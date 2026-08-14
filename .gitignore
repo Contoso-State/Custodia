@@ -1,0 +1,31 @@
+# Secrets — never commit
+*.secret
+.env
+.env.*
+secrets.json
+appsettings.local.json
+local.settings.json
+*.pfx
+*.pem
+
+# Local config produced by scripts/1-setup-app-registration.ps1
+gwinniq-app.local.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Output
+out/
+dist/
+*.log

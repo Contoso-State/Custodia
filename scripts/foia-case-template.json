@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "templateVersion": "1.0.0",
+  "description": "Machine-readable defaults for FOIA / public-records eDiscovery cases created by GwinnIQ. Used by scripts/2-create-foia-case.ps1 and src/gwinniq_ediscovery.py. Contains no tenant-specific or identifying values.",
+
+  "naming": {
+    "casePattern": "FOIA-{year}-{requestNumber}-{shortSubject}",
+    "searchPattern": "{caseName}-search-{iteration}",
+    "example": "FOIA-2026-00142-budget-emails",
+    "rules": [
+      "requestNumber is the intake tracking number, zero-padded to 5 digits.",
+      "shortSubject is lowercase kebab-case, max 40 characters, no personal names.",
+      "iteration starts at 01 and increments for each refinement of the same request."
+    ]
+  },
+
+  "defaults": {
+    "dataSourceScopes": "none",
+    "statisticsOptions": "includeQueryStats,includeUnindexedStats",
+    "descriptionTemplate": "Public-records request {requestNumber}. Received {receivedDate}. Statutory response due {dueDate}. Requested date range {rangeStart} to {rangeEnd}."
+  },
+
+  "dataSourceScopeOptions": [
+    {
+      "value": "none",
+      "description": "No tenant-wide scope. Sources are attached explicitly. Narrowest and preferred default."
+    },
+    {
+      "value": "allTenantMailboxes",
+      "description": "All mailboxes in the tenant. Tenant-wide: requires explicit reviewer acknowledgement."
+    },
+    {
+      "value": "allTenantSites",
+      "description": "All SharePoint and OneDrive sites in the tenant. Tenant-wide: requires explicit reviewer acknowledgement."
+    },
+    {
+      "value": "allCaseCustodians",
+      "description": "All custodians already added to the case."
+    },
+    {
+      "value": "allCaseNoncustodialDataSources",
+      "description": "All non-custodial data sources already added to the case."
+    }
+  ],
+
+  "queryDefaults": {
+    "dateFieldMail": "received",
+    "dateFieldDocuments": "lastmodifiedtime",
+    "requireDateRange": true,
+    "kqlTemplate": "({keywords}) AND (received>={rangeStart} AND received<={rangeEnd})",
+    "notes": [
+      "Always bound a FOIA search by the requested date range.",
+      "Prefer explicit keyword lists over broad wildcards to keep the estimate meaningful.",
+      "Dates are ISO 8601 (YYYY-MM-DD)."
+    ]
+  },
+
+  "reviewSettings": {
+    "note": "These values are recorded here for the FOIA team's own reference and for later manual configuration in the Purview portal. GwinnIQ does NOT apply them: near-duplicate detection, ignore-text rules, and review tags are all outside the v1 tool scope.",
+    "nearDuplicateThreshold": 65,
+    "ignoreText": [
+      "This message originated outside the organization.",
+      "CONFIDENTIALITY NOTICE: This email and any attachments are for the sole use of the intended recipient.",
+      "Please consider the environment before printing this email.",
+      "Sent from my mobile device."
+    ],
+    "reviewTags": [
+      {
+        "name": "Responsive",
+        "childTags": [],
+        "appliedBy": "FOIA reviewer only — never by GwinnIQ."
+      },
+      {
+        "name": "Non-Responsive",
+        "childTags": [],
+        "appliedBy": "FOIA reviewer only — never by GwinnIQ."
+      },
+      {
+        "name": "Exempt",
+        "childTags": [
+          "Personal privacy",
+          "Attorney-client privileged",
+          "Deliberative process",
+          "Law enforcement",
+          "Security"
+        ],
+        "appliedBy": "FOIA reviewer and counsel only — never by GwinnIQ."
+      },
+      {
+        "name": "Needs legal review",
+        "childTags": [],
+        "appliedBy": "FOIA reviewer only — never by GwinnIQ."
+      }
+    ]
+  },
+
+  "guardrails": {
+    "confirmBeforeCreate": true,
+    "chainCreatesFromSingleConfirmation": false,
+    "allowedOperations": [
+      "listCases",
+      "getCase",
+      "createCase",
+      "createSearch",
+      "estimateStatistics",
+      "listOperations",
+      "getLastEstimateStatistics"
+    ],
+    "prohibitedOperations": [
+      "export",
+      "purgeData",
+      "deleteCase",
+      "deleteSearch",
+      "legalHold",
+      "addToReviewSet",
+      "runAnalytics",
+      "applyReviewTags"
+    ]
+  }
+}

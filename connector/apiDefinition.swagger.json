@@ -1,0 +1,615 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "GwinnIQ eDiscovery (Read + Create)",
+    "description": "Narrow Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only. Read and create operations only: no export, no purge, no delete, no holds, no review sets, no tagging.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GwinnIQ"
+    }
+  },
+  "host": "graph.microsoft.com",
+  "basePath": "/v1.0",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "securityDefinitions": {
+    "oauth2_auth": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/authorize",
+      "tokenUrl": "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+      "scopes": {
+        "eDiscovery.ReadWrite.All": "Read and write eDiscovery cases and searches as the signed-in user.",
+        "User.Read": "Sign in and read the signed-in user's profile."
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth2_auth": [
+        "eDiscovery.ReadWrite.All",
+        "User.Read"
+      ]
+    }
+  ],
+  "paths": {
+    "/security/cases/ediscoveryCases": {
+      "get": {
+        "operationId": "ListCases",
+        "summary": "List eDiscovery cases",
+        "description": "Lists the eDiscovery cases the signed-in reviewer is permitted to see. Results are already scoped by the reviewer's Purview eDiscovery role.",
+        "parameters": [
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of cases to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          },
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "OData filter, for example: status eq 'active'.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Filter"
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "OData sort, for example: createdDateTime desc.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order by"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A collection of eDiscovery cases.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoveryCaseCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateCase",
+        "summary": "Create an eDiscovery case",
+        "description": "Creates a new eDiscovery (Premium) case owned by the signed-in reviewer. Requires explicit reviewer confirmation before it is called.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCaseRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created case.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoveryCase"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}": {
+      "get": {
+        "operationId": "GetCase",
+        "summary": "Get an eDiscovery case",
+        "description": "Gets a single eDiscovery case by its ID.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested case.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoveryCase"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches": {
+      "post": {
+        "operationId": "CreateSearch",
+        "summary": "Create a search in a case",
+        "description": "Creates an eDiscovery search inside a case using a KQL content query and a data source scope. Requires explicit reviewer confirmation before it is called.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSearchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created search.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoverySearch"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}/estimateStatistics": {
+      "post": {
+        "operationId": "EstimateSearchStatistics",
+        "summary": "Estimate search statistics",
+        "description": "Starts an asynchronous estimate of the number of items and their volume matching the search. Returns 202 Accepted with a Location header pointing at the operation. Poll ListCaseOperations, then read GetLastEstimateStatistics.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoverySearchId",
+            "in": "path",
+            "description": "The ID of the eDiscovery search.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EstimateStatisticsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The estimate has been accepted and is running.",
+            "headers": {
+              "Location": {
+                "description": "URL of the estimateStatisticsOperation created to handle the estimate.",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/operations": {
+      "get": {
+        "operationId": "ListCaseOperations",
+        "summary": "List case operations",
+        "description": "Lists long-running operations in a case. Poll this until no operation has status notStarted or running before reading estimate results.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of operations to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          },
+          {
+            "name": "$orderby",
+            "in": "query",
+            "description": "OData sort, for example: createdDateTime desc.",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Order by"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A collection of case operations.",
+            "schema": {
+              "$ref": "#/definitions/CaseOperationCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}/lastEstimateStatisticsOperation": {
+      "get": {
+        "operationId": "GetLastEstimateStatistics",
+        "summary": "Get the last estimate statistics for a search",
+        "description": "Reads the most recent completed estimate statistics operation for a search, including indexed and unindexed item counts and volumes.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoverySearchId",
+            "in": "path",
+            "description": "The ID of the eDiscovery search.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The last estimate statistics operation.",
+            "schema": {
+              "$ref": "#/definitions/EstimateStatisticsOperation"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "CreateCaseRequest": {
+      "type": "object",
+      "required": [
+        "displayName"
+      ],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the case. Use the team's FOIA naming pattern.",
+          "x-ms-summary": "Case display name"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the case, for example the request reference and the requested date range.",
+          "x-ms-summary": "Description"
+        }
+      }
+    },
+    "CreateSearchRequest": {
+      "type": "object",
+      "required": [
+        "displayName"
+      ],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the search.",
+          "x-ms-summary": "Search display name"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the search.",
+          "x-ms-summary": "Description"
+        },
+        "contentQuery": {
+          "type": "string",
+          "description": "The KQL (Keyword Query Language) query string used for the search.",
+          "x-ms-summary": "Content query (KQL)"
+        },
+        "dataSourceScopes": {
+          "type": "string",
+          "description": "The scope of the search across the tenant.",
+          "enum": [
+            "none",
+            "allTenantMailboxes",
+            "allTenantSites",
+            "allCaseCustodians",
+            "allCaseNoncustodialDataSources"
+          ],
+          "default": "none",
+          "x-ms-summary": "Data source scope"
+        }
+      }
+    },
+    "EstimateStatisticsRequest": {
+      "type": "object",
+      "properties": {
+        "statisticsOptions": {
+          "type": "string",
+          "description": "Comma-separated statistics options. Possible values: includeRefiners, includeQueryStats, includeUnindexedStats, advancedIndexing, locationsWithoutHits. advancedIndexing and locationsWithoutHits are only considered when includeUnindexedStats is set.",
+          "default": "includeQueryStats,includeUnindexedStats",
+          "x-ms-summary": "Statistics options"
+        }
+      }
+    },
+    "EdiscoveryCase": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The case ID."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the case."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the case."
+        },
+        "status": {
+          "type": "string",
+          "description": "The case status, for example active or closed."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the case was created."
+        },
+        "lastModifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the case was last modified."
+        },
+        "closedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the case was closed, if applicable."
+        },
+        "externalId": {
+          "type": "string",
+          "description": "The external case reference, if set."
+        }
+      }
+    },
+    "EdiscoveryCaseCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EdiscoveryCase"
+          }
+        },
+        "@odata.nextLink": {
+          "type": "string",
+          "description": "Link to the next page of results."
+        }
+      }
+    },
+    "EdiscoverySearch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The search ID."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The display name of the search."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the search."
+        },
+        "contentQuery": {
+          "type": "string",
+          "description": "The KQL query string used for the search."
+        },
+        "dataSourceScopes": {
+          "type": "string",
+          "description": "The scope of the search across the tenant."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the search was created."
+        },
+        "lastModifiedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the search was last modified."
+        }
+      }
+    },
+    "CaseOperation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The operation ID."
+        },
+        "action": {
+          "type": "string",
+          "description": "The action the operation performs, for example estimateStatistics."
+        },
+        "status": {
+          "type": "string",
+          "description": "The operation status. Possible values include notStarted, submissionFailed, running, succeeded, partiallySucceeded, failed."
+        },
+        "percentProgress": {
+          "type": "integer",
+          "description": "Progress of the operation."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operation was created."
+        },
+        "completedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operation completed."
+        }
+      }
+    },
+    "CaseOperationCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CaseOperation"
+          }
+        },
+        "@odata.nextLink": {
+          "type": "string",
+          "description": "Link to the next page of results."
+        }
+      }
+    },
+    "EstimateStatisticsOperation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The operation ID."
+        },
+        "action": {
+          "type": "string",
+          "description": "The action the operation performs."
+        },
+        "status": {
+          "type": "string",
+          "description": "The operation status."
+        },
+        "percentProgress": {
+          "type": "integer",
+          "description": "Progress of the operation."
+        },
+        "indexedItemCount": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of indexed items matching the search."
+        },
+        "indexedItemsSize": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total size in bytes of indexed items matching the search."
+        },
+        "unindexedItemCount": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The number of unindexed items matching the search."
+        },
+        "unindexedItemsSize": {
+          "type": "integer",
+          "format": "int64",
+          "description": "The total size in bytes of unindexed items matching the search."
+        },
+        "mailboxCount": {
+          "type": "integer",
+          "description": "The number of mailboxes with hits."
+        },
+        "siteCount": {
+          "type": "integer",
+          "description": "The number of sites with hits."
+        },
+        "createdDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operation was created."
+        },
+        "completedDateTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the operation completed."
+        }
+      }
+    },
+    "GraphError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "The Microsoft Graph error code."
+            },
+            "message": {
+              "type": "string",
+              "description": "The Microsoft Graph error message."
+            }
+          }
+        }
+      }
+    }
+  }
+}
