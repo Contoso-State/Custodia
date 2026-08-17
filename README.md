@@ -1,4 +1,19 @@
-# Custodia
+<p align="center">
+  <img src="docs/custodia-avatar.png" alt="Custodia" width="140" height="140">
+</p>
+
+<h1 align="center">Custodia</h1>
+
+<p align="center">
+  <strong>Intelligent, guardrailed eDiscovery for public-records teams.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Microsoft-Copilot%20Studio-0067b8" alt="Copilot Studio">
+  <img src="https://img.shields.io/badge/Microsoft%20Graph-eDiscovery%20v1.0-2b579a" alt="Microsoft Graph eDiscovery">
+  <img src="https://img.shields.io/badge/Auth-Delegated%20(OBO)-1E2761" alt="Delegated OBO auth">
+  <img src="https://img.shields.io/badge/Scope-Read%20%2B%20Create%20only-2C7A55" alt="Read and create only">
+</p>
 
 A Microsoft Copilot Studio agent that helps a FOIA / public-records team run Microsoft
 Purview eDiscovery (Premium). Custodia creates eDiscovery cases, builds the search query,
