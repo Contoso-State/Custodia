@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "GwinnIQ eDiscovery (Read + Create)",
-    "description": "Narrow Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only. Read and create operations only: no export, no purge, no delete, no holds, no review sets, no tagging.",
-    "version": "1.0.0",
+    "title": "GwinnIQ eDiscovery",
+    "description": "Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only; every call is bounded by the signed-in reviewer's own Purview eDiscovery role. Covers case, custodian, search, review set, tagging and export operations. Deliberately omits case deletion, purgeData, and legal hold creation or removal - those remain manual actions in the Purview portal.",
+    "version": "2.0.0",
     "contact": {
       "name": "GwinnIQ"
     }
@@ -147,6 +147,44 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "UpdateCase",
+        "summary": "Update a case",
+        "description": "Updates the display name, description or external ID of a case. Requires explicit reviewer confirmation.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateCaseRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated case.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoveryCase"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches": {
@@ -178,6 +216,45 @@
             "description": "The created search.",
             "schema": {
               "$ref": "#/definitions/EdiscoverySearch"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "ListSearches",
+        "summary": "List searches in a case",
+        "description": "Lists the eDiscovery searches defined in the case.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The searches in the case.",
+            "schema": {
+              "$ref": "#/definitions/SearchCollection"
             }
           },
           "default": {
@@ -320,6 +397,669 @@
             "description": "The last estimate statistics operation.",
             "schema": {
               "$ref": "#/definitions/EstimateStatisticsOperation"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/close": {
+      "post": {
+        "operationId": "CloseCase",
+        "summary": "Close a case",
+        "description": "Closes an eDiscovery case. Consequential: requires explicit reviewer confirmation. Closing does not delete the case or its records.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The case was closed."
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/custodians": {
+      "get": {
+        "operationId": "ListCustodians",
+        "summary": "List custodians in a case",
+        "description": "Lists the custodians currently associated with the case.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The custodians in the case.",
+            "schema": {
+              "$ref": "#/definitions/CustodianCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateCustodian",
+        "summary": "Add a custodian to a case",
+        "description": "Adds a custodian to the case by primary SMTP address. Resolve the identity before calling; never guess when several people match a name. Requires explicit reviewer confirmation.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateCustodianRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created custodian.",
+            "schema": {
+              "$ref": "#/definitions/Custodian"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/custodians/{ediscoveryCustodianId}": {
+      "get": {
+        "operationId": "GetCustodian",
+        "summary": "Get a custodian",
+        "description": "Reads a single custodian, including hold status and released date.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoveryCustodianId",
+            "in": "path",
+            "description": "The ID of the custodian.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Custodian ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The custodian.",
+            "schema": {
+              "$ref": "#/definitions/Custodian"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/noncustodialDataSources": {
+      "get": {
+        "operationId": "ListNoncustodialDataSources",
+        "summary": "List noncustodial data sources",
+        "description": "Lists noncustodial data sources (shared mailboxes, SharePoint sites, Teams locations) attached to the case.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The noncustodial data sources.",
+            "schema": {
+              "$ref": "#/definitions/NoncustodialDataSourceCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}": {
+      "get": {
+        "operationId": "GetSearch",
+        "summary": "Get a search",
+        "description": "Reads a single search including its content query and data source scope. Use this to show the reviewer the exact query before running an estimate or a collection.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoverySearchId",
+            "in": "path",
+            "description": "The ID of the eDiscovery search.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The search.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoverySearch"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "UpdateSearch",
+        "summary": "Update a search",
+        "description": "Updates the content query, description or data source scope of an existing search. Narrowing or broadening a query changes the meaning of the records request: restate the old and new query and require explicit reviewer confirmation.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoverySearchId",
+            "in": "path",
+            "description": "The ID of the eDiscovery search.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Search ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateSearchRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The updated search.",
+            "schema": {
+              "$ref": "#/definitions/EdiscoverySearch"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets": {
+      "get": {
+        "operationId": "ListReviewSets",
+        "summary": "List review sets in a case",
+        "description": "Lists the review sets in the case.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The review sets in the case.",
+            "schema": {
+              "$ref": "#/definitions/ReviewSetCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateReviewSet",
+        "summary": "Create a review set",
+        "description": "Creates a review set in the case. Reuse an existing review set when one already fits the request rather than creating duplicates.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateReviewSetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created review set.",
+            "schema": {
+              "$ref": "#/definitions/ReviewSet"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}": {
+      "get": {
+        "operationId": "GetReviewSet",
+        "summary": "Get a review set",
+        "description": "Reads a single review set.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoveryReviewSetId",
+            "in": "path",
+            "description": "The ID of the review set.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Review Set ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The review set.",
+            "schema": {
+              "$ref": "#/definitions/ReviewSet"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}/addToReviewSet": {
+      "post": {
+        "operationId": "AddToReviewSet",
+        "summary": "Add search results to a review set",
+        "description": "Starts collecting the results of a search into a review set. This moves real content and is asynchronous: it returns 202 with a Location header. Poll ListCaseOperations until the operation completes. Requires explicit reviewer confirmation, and the search should be estimated first so the reviewer knows the volume.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoveryReviewSetId",
+            "in": "path",
+            "description": "The ID of the review set.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Review Set ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddToReviewSetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The collection into the review set has started.",
+            "headers": {
+              "Location": {
+                "description": "URL of the operation created to handle this request. Poll it for status.",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}/export": {
+      "post": {
+        "operationId": "ExportReviewSet",
+        "summary": "Export a review set",
+        "description": "Starts an export of a review set. This produces the production package and is the most consequential operation in the connector. Never call it without confirmed release approval from authorized records or legal personnel. Asynchronous: returns 202 with a Location header.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "ediscoveryReviewSetId",
+            "in": "path",
+            "description": "The ID of the review set.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Review Set ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ExportReviewSetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "The export has started.",
+            "headers": {
+              "Location": {
+                "description": "URL of the operation created to handle this request. Poll it for status.",
+                "type": "string"
+              }
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/tags": {
+      "get": {
+        "operationId": "ListTags",
+        "summary": "List review tags in a case",
+        "description": "Lists the review tags defined in the case. Use this to discover the organizational tagging schema before applying any tag.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 50,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The review tags in the case.",
+            "schema": {
+              "$ref": "#/definitions/ReviewTagCollection"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateTag",
+        "summary": "Create a review tag",
+        "description": "Creates a review tag in the case. Prefer reusing the existing organizational tagging schema over inventing new tags.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateTagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "The created review tag.",
+            "schema": {
+              "$ref": "#/definitions/ReviewTag"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/operations/{caseOperationId}": {
+      "get": {
+        "operationId": "GetCaseOperation",
+        "summary": "Get a case operation",
+        "description": "Reads a single long-running operation, including status, percent progress and any result. Use this to confirm an asynchronous action actually succeeded before reporting it as done.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "caseOperationId",
+            "in": "path",
+            "description": "The ID of the case operation.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Operation ID",
+            "x-ms-url-encoding": "single"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The case operation.",
+            "schema": {
+              "$ref": "#/definitions/CaseOperation"
+            }
+          },
+          "default": {
+            "description": "Error.",
+            "schema": {
+              "$ref": "#/definitions/GraphError"
+            }
+          }
+        }
+      }
+    },
+    "/security/cases/ediscoveryCases/{ediscoveryCaseId}/legalHolds": {
+      "get": {
+        "operationId": "ListLegalHolds",
+        "summary": "List legal holds in a case",
+        "description": "Read-only view of the legal holds in the case, so the reviewer can see what is preserved. Creating and removing holds is deliberately not available through this connector.",
+        "parameters": [
+          {
+            "name": "ediscoveryCaseId",
+            "in": "path",
+            "description": "The ID of the eDiscovery case.",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Case ID",
+            "x-ms-url-encoding": "single"
+          },
+          {
+            "name": "$top",
+            "in": "query",
+            "description": "Maximum number of items to return.",
+            "required": false,
+            "type": "integer",
+            "default": 25,
+            "x-ms-summary": "Top"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The legal holds in the case.",
+            "schema": {
+              "$ref": "#/definitions/LegalHoldCollection"
             }
           },
           "default": {
@@ -607,6 +1347,429 @@
               "type": "string",
               "description": "The Microsoft Graph error message."
             }
+          }
+        }
+      }
+    },
+    "UpdateCaseRequest": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "New case name.",
+          "x-ms-summary": "Case name"
+        },
+        "description": {
+          "type": "string",
+          "description": "New case description.",
+          "x-ms-summary": "Description"
+        },
+        "externalId": {
+          "type": "string",
+          "description": "External case or request number for cross-reference.",
+          "x-ms-summary": "External ID"
+        }
+      }
+    },
+    "CreateCustodianRequest": {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "The custodian's primary SMTP address.",
+          "x-ms-summary": "Email"
+        }
+      }
+    },
+    "Custodian": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Custodian ID.",
+          "x-ms-summary": "Custodian ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Custodian display name.",
+          "x-ms-summary": "Display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "Custodian primary SMTP address.",
+          "x-ms-summary": "Email"
+        },
+        "status": {
+          "type": "string",
+          "description": "Custodian status.",
+          "x-ms-summary": "Status"
+        },
+        "holdStatus": {
+          "type": "string",
+          "description": "Whether a hold is applied to this custodian.",
+          "x-ms-summary": "Hold status"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "When the custodian was added.",
+          "x-ms-summary": "Created",
+          "format": "date-time"
+        },
+        "releasedDateTime": {
+          "type": "string",
+          "description": "When the custodian was released, if released.",
+          "x-ms-summary": "Released",
+          "format": "date-time"
+        }
+      }
+    },
+    "CustodianCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Custodian"
+          }
+        }
+      }
+    },
+    "NoncustodialDataSource": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Noncustodial data source ID.",
+          "x-ms-summary": "Data source ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Data source display name.",
+          "x-ms-summary": "Display name"
+        },
+        "status": {
+          "type": "string",
+          "description": "Data source status.",
+          "x-ms-summary": "Status"
+        },
+        "holdStatus": {
+          "type": "string",
+          "description": "Whether a hold is applied.",
+          "x-ms-summary": "Hold status"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "When the data source was added.",
+          "x-ms-summary": "Created",
+          "format": "date-time"
+        }
+      }
+    },
+    "NoncustodialDataSourceCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NoncustodialDataSource"
+          }
+        }
+      }
+    },
+    "SearchCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EdiscoverySearch"
+          }
+        }
+      }
+    },
+    "UpdateSearchRequest": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "New search name.",
+          "x-ms-summary": "Search name"
+        },
+        "description": {
+          "type": "string",
+          "description": "New search description.",
+          "x-ms-summary": "Description"
+        },
+        "contentQuery": {
+          "type": "string",
+          "description": "New KQL content query. Changing this changes the meaning of the records request - restate it to the reviewer first.",
+          "x-ms-summary": "Content query (KQL)"
+        },
+        "dataSourceScopes": {
+          "type": "string",
+          "description": "New data source scope.",
+          "x-ms-summary": "Data source scopes",
+          "enum": [
+            "none",
+            "allTenantMailboxes",
+            "allTenantSites",
+            "allCaseCustodians",
+            "allCaseNoncustodialDataSources"
+          ]
+        }
+      }
+    },
+    "CreateReviewSetRequest": {
+      "type": "object",
+      "required": [
+        "displayName"
+      ],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The review set name.",
+          "x-ms-summary": "Review set name"
+        }
+      }
+    },
+    "ReviewSet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Review set ID.",
+          "x-ms-summary": "Review set ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Review set name.",
+          "x-ms-summary": "Review set name"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "When the review set was created.",
+          "x-ms-summary": "Created",
+          "format": "date-time"
+        }
+      }
+    },
+    "ReviewSetCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReviewSet"
+          }
+        }
+      }
+    },
+    "AddToReviewSetRequest": {
+      "type": "object",
+      "required": [
+        "search"
+      ],
+      "properties": {
+        "search": {
+          "type": "object",
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "The ID of the search whose results should be collected.",
+              "x-ms-summary": "Search ID"
+            }
+          }
+        },
+        "additionalDataOptions": {
+          "type": "string",
+          "description": "Comma-separated extra data to collect. Values: allVersions, linkedFiles, advancedIndexing, listAttachments, htmlTranscripts, messageConversationExpansion, locationsWithoutHits, allItemsInFolder.",
+          "x-ms-summary": "Additional data options"
+        },
+        "itemsToInclude": {
+          "type": "string",
+          "description": "Which items to include.",
+          "x-ms-summary": "Items to include",
+          "enum": [
+            "searchHits",
+            "partiallyIndexed"
+          ]
+        },
+        "cloudAttachmentVersion": {
+          "type": "string",
+          "description": "How many cloud attachment versions to collect.",
+          "x-ms-summary": "Cloud attachment version",
+          "enum": [
+            "latest",
+            "recent10",
+            "recent100",
+            "all"
+          ]
+        },
+        "documentVersion": {
+          "type": "string",
+          "description": "How many document versions to collect.",
+          "x-ms-summary": "Document version",
+          "enum": [
+            "latest",
+            "recent10",
+            "recent100",
+            "all"
+          ]
+        }
+      }
+    },
+    "ExportReviewSetRequest": {
+      "type": "object",
+      "required": [
+        "outputName"
+      ],
+      "properties": {
+        "outputName": {
+          "type": "string",
+          "description": "Name of the export package.",
+          "x-ms-summary": "Output name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the export.",
+          "x-ms-summary": "Description"
+        },
+        "exportOptions": {
+          "type": "string",
+          "description": "Comma-separated format options. Values: originalFiles, text, pdfReplacement, tags, splitSource, includeFolderAndPath, friendlyName, condensePaths. Summary and load files are always included.",
+          "x-ms-summary": "Export options"
+        },
+        "exportStructure": {
+          "type": "string",
+          "description": "Packaging structure for the export. Prefer pst or msg; directory is deprecated.",
+          "x-ms-summary": "Export structure",
+          "enum": [
+            "none",
+            "pst",
+            "msg",
+            "directory"
+          ]
+        }
+      }
+    },
+    "CreateTagRequest": {
+      "type": "object",
+      "required": [
+        "displayName"
+      ],
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "description": "The tag name.",
+          "x-ms-summary": "Tag name"
+        },
+        "description": {
+          "type": "string",
+          "description": "The tag description.",
+          "x-ms-summary": "Description"
+        },
+        "childSelectability": {
+          "type": "string",
+          "description": "Whether child tags are single- or multi-select.",
+          "x-ms-summary": "Child selectability",
+          "enum": [
+            "One",
+            "Many"
+          ]
+        }
+      }
+    },
+    "ReviewTag": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Tag ID.",
+          "x-ms-summary": "Tag ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Tag name.",
+          "x-ms-summary": "Tag name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Tag description.",
+          "x-ms-summary": "Description"
+        },
+        "childSelectability": {
+          "type": "string",
+          "description": "Child selectability.",
+          "x-ms-summary": "Child selectability"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "When the tag was created.",
+          "x-ms-summary": "Created",
+          "format": "date-time"
+        }
+      }
+    },
+    "ReviewTagCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReviewTag"
+          }
+        }
+      }
+    },
+    "LegalHold": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Legal hold ID.",
+          "x-ms-summary": "Hold ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Legal hold name.",
+          "x-ms-summary": "Hold name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Legal hold description.",
+          "x-ms-summary": "Description"
+        },
+        "status": {
+          "type": "string",
+          "description": "Hold status.",
+          "x-ms-summary": "Status"
+        },
+        "isEnabled": {
+          "type": "boolean",
+          "description": "Whether the hold is currently enabled.",
+          "x-ms-summary": "Is enabled"
+        },
+        "createdDateTime": {
+          "type": "string",
+          "description": "When the hold was created.",
+          "x-ms-summary": "Created",
+          "format": "date-time"
+        }
+      }
+    },
+    "LegalHoldCollection": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/LegalHold"
           }
         }
       }
