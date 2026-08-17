@@ -5,6 +5,14 @@ Purview eDiscovery (Premium). GwinnIQ creates eDiscovery cases, builds the searc
 runs a statistics estimate, and reads the results back — always acting **on behalf of the
 signed-in reviewer**.
 
+> ### 📊 New here? Start with the install guide
+>
+> **[Download the GwinnIQ Install & Administration Guide (PowerPoint) →](docs/GwinnIQ-Install-Guide.pptx)**
+>
+> A 12-slide walkthrough written for state and county teams: what GwinnIQ does, why it is safe
+> to deploy, and the four phases to install it in your own Copilot Studio. This README is the
+> detailed companion to that deck.
+
 ---
 
 ## Why
@@ -121,6 +129,9 @@ Enforced in `agent/instructions.md`:
 ```
 GwinnIQ/
 ├── README.md                             # this file
+├── docs/                                 # customer-facing guide + screenshots
+│   ├── GwinnIQ-Install-Guide.pptx        #   the install deck linked above
+│   └── screenshots/SHOTLIST.md           #   which screenshots to capture, and where
 ├── connector/apiDefinition.swagger.json  # OpenAPI 2.0 the custom connector imports (25 ops)
 ├── agent/instructions.md                 # the system prompt / behavior contract
 ├── agent/brand/gwinniq-avatar.png        # agent icon (512x512) + .svg source

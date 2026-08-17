@@ -56,7 +56,7 @@
   },
 
   "reviewSettings": {
-    "note": "These values are recorded here for the FOIA team's own reference and for later manual configuration in the Purview portal. GwinnIQ does NOT apply them: near-duplicate detection, ignore-text rules, and review tags are all outside the v1 tool scope.",
+    "note": "These values are recorded here for the FOIA team's own reference and for later manual configuration in the Purview portal. GwinnIQ can create and list case-level tags (the labels), but it does NOT apply tags to documents, and it does NOT configure near-duplicate detection or ignore-text rules — those are done by a person in the Purview portal.",
     "nearDuplicateThreshold": 65,
     "ignoreText": [
       "This message originated outside the organization.",
@@ -97,24 +97,30 @@
   "guardrails": {
     "confirmBeforeCreate": true,
     "chainCreatesFromSingleConfirmation": false,
+    "estimateBeforeCollect": true,
+    "confirmSeparatelyBeforeExport": true,
     "allowedOperations": [
-      "listCases",
-      "getCase",
-      "createCase",
-      "createSearch",
-      "estimateStatistics",
-      "listOperations",
-      "getLastEstimateStatistics"
+      "listCases", "getCase", "createCase", "updateCase", "closeCase",
+      "listCustodians", "getCustodian", "createCustodian",
+      "listNoncustodialDataSources",
+      "listSearches", "getSearch", "createSearch", "updateSearch",
+      "estimateStatistics", "getLastEstimateStatistics",
+      "listReviewSets", "getReviewSet", "createReviewSet", "addToReviewSet", "exportReviewSet",
+      "listTags", "createTag",
+      "listLegalHolds",
+      "listCaseOperations", "getCaseOperation"
     ],
     "prohibitedOperations": [
-      "export",
       "purgeData",
       "deleteCase",
       "deleteSearch",
-      "legalHold",
-      "addToReviewSet",
-      "runAnalytics",
-      "applyReviewTags"
+      "deleteReviewSet",
+      "deleteCustodian",
+      "createLegalHold",
+      "updateLegalHold",
+      "releaseLegalHold",
+      "applyTagToDocument",
+      "runAnalytics"
     ]
   }
 }
