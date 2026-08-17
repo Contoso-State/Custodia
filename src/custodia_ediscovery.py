@@ -1,6 +1,6 @@
-"""FOIAIQ — reference Python client for the Microsoft Purview eDiscovery (Premium) flow.
+"""Custodia — reference Python client for the Microsoft Purview eDiscovery (Premium) flow.
 
-This module mirrors exactly the operations the FOIAIQ Copilot Studio agent is permitted to
+This module mirrors exactly the operations the Custodia Copilot Studio agent is permitted to
 perform, and nothing more:
 
     list cases -> get case -> create case -> create search -> estimate statistics
@@ -18,7 +18,7 @@ Requires:
     pip install azure-identity requests
 
 Usage:
-    python -m foiaiq_ediscovery --tenant-id <TENANT-ID> --client-id <APP-ID> \
+    python -m custodia_ediscovery --tenant-id <TENANT-ID> --client-id <APP-ID> \
         --request-number 00142 --short-subject budget-emails \
         --keywords '"budget" OR "appropriation"' \
         --range-start 2026-01-01 --range-end 2026-06-30 --dry-run
@@ -94,8 +94,8 @@ class EstimateResult:
         )
 
 
-class FOIAIQClient:
-    """Delegated-auth client for the narrow FOIAIQ eDiscovery surface."""
+class CustodiaClient:
+    """Delegated-auth client for the narrow Custodia eDiscovery surface."""
 
     def __init__(self, tenant_id: str, client_id: str, timeout: int = 60) -> None:
         if not tenant_id or tenant_id.startswith("<"):
@@ -414,7 +414,7 @@ def main(argv: list[str] | None = None) -> int:
         print("Aborted. Nothing was created.")
         return 1
 
-    client = FOIAIQClient(args.tenant_id, args.client_id)
+    client = CustodiaClient(args.tenant_id, args.client_id)
 
     try:
         case_id, search_id, estimate = client.run_foia_flow(

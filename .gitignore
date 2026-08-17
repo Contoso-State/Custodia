@@ -9,7 +9,7 @@ local.settings.json
 *.pem
 
 # Local config produced by scripts/1-setup-app-registration.ps1
-foiaiq-app.local.json
+custodia-app.local.json
 
 # Python
 __pycache__/

@@ -4,7 +4,7 @@
     and read the result back.
 
 .DESCRIPTION
-    This script mirrors exactly what the FOIAIQ agent is allowed to do. It stops at
+    This script mirrors exactly what the Custodia agent is allowed to do. It stops at
     estimate + read. It never exports, purges, deletes, holds, populates a review set, or
     applies review tags.
 

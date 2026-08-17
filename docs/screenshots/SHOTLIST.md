@@ -1,6 +1,6 @@
 # Screenshot shot list
 
-The install guide (`docs/FOIAIQ-Install-Guide.pptx`) and the README leave labeled
+The install guide (`docs/Custodia-Install-Guide.pptx`) and the README leave labeled
 placeholders for screenshots. They are **placeholders on purpose** — every screen in this
 setup lives inside *your* tenant's admin portals and would show tenant IDs, secrets, role
 assignments, or real case data. Those must never be committed to a shared repository.
@@ -13,14 +13,14 @@ three numbered shots are the ones the PowerPoint references directly.
 
 ## Required — referenced by the PowerPoint
 
-These three appear as placeholder frames in `FOIAIQ-Install-Guide.pptx`. Replace each frame
+These three appear as placeholder frames in `Custodia-Install-Guide.pptx`. Replace each frame
 with the matching image.
 
 | # | File name | Portal | What to capture |
 |---|-----------|--------|-----------------|
 | **1** | `01-entra-api-permissions.png` | Entra admin center → App registrations → *your app* → **API permissions** | The permissions list showing **eDiscovery.ReadWrite.All** and **User.Read** as **Delegated**, each with a green **“Granted for &lt;tenant&gt;”** status. This is the shot that proves consent succeeded and that there are **no application permissions**. |
 | **2** | `02-connector-security.png` | Power Platform → Custom connectors → *your connector* → **Security** tab | The OAuth 2.0 settings filled in — identity provider Microsoft Entra ID, Resource URL `https://graph.microsoft.com`, and **Enable on-behalf-of login = On**. **Blank out the Client secret field before capturing.** |
-| **3** | `03-copilot-studio-agent.png` | Copilot Studio → *your FOIAIQ agent* | The agent open with the instructions pasted and the custom connector's actions listed under **Tools / Actions**. The FOIAIQ avatar as the icon is a nice touch to include. |
+| **3** | `03-copilot-studio-agent.png` | Copilot Studio → *your Custodia agent* | The agent open with the instructions pasted and the custom connector's actions listed under **Tools / Actions**. The Custodia avatar as the icon is a nice touch to include. |
 
 ---
 
@@ -34,8 +34,8 @@ Optional but they make the README much easier to follow. Same folder, same namin
 | `05-entra-redirect-uri.png` | Entra → App registrations → *your app* → **Authentication** | The **Web** platform with the connector's generated redirect URL pasted in. |
 | `06-connector-test.png` | Power Platform → Custom connectors → *your connector* → **Test** tab | A successful `ListCases` test call returning **200** (redact any real case names in the response body). |
 | `07-purview-role-group.png` | Purview portal → **Roles & scopes** → **Role groups** | The **eDiscovery Manager** role group with a reviewer added as a member. |
-| `08-agent-share.png` | Copilot Studio → *your FOIAIQ agent* → **Share** | The share dialog granting a reviewer access to the published agent. |
-| `09-agent-preview.png` | Copilot Studio → *your FOIAIQ agent* → **Test / Preview** | A short conversation: “list my cases”, then a create request where the agent **restates and waits** for confirmation. The single best shot for showing the agent in action. |
+| `08-agent-share.png` | Copilot Studio → *your Custodia agent* → **Share** | The share dialog granting a reviewer access to the published agent. |
+| `09-agent-preview.png` | Copilot Studio → *your Custodia agent* → **Test / Preview** | A short conversation: “list my cases”, then a create request where the agent **restates and waits** for confirmation. The single best shot for showing the agent in action. |
 
 ---
 
@@ -59,6 +59,6 @@ out — a slightly cropped screenshot is always safer than a leaked identifier.
 ## After you add the images
 
 The PowerPoint placeholders are static frames, so replacing them is a manual step in
-PowerPoint: open `FOIAIQ-Install-Guide.pptx`, delete the dashed placeholder on the Phase 1–3
+PowerPoint: open `Custodia-Install-Guide.pptx`, delete the dashed placeholder on the Phase 1–3
 slides, and **Insert → Picture** the matching file. The README images render automatically
 once the files exist at the referenced paths.
