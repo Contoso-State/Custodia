@@ -1,5 +1,11 @@
 <p align="center">
-  <img src="docs/custodia-social-card.png" alt="Custodia — intelligent, guardrailed eDiscovery for public-records teams" width="100%">
+  <img src="docs/custodia-avatar.png" alt="Custodia" width="140" height="140">
+</p>
+
+<h1 align="center">Custodia</h1>
+
+<p align="center">
+  <strong>Intelligent, guardrailed eDiscovery for public-records teams.</strong>
 </p>
 
 <p align="center">
