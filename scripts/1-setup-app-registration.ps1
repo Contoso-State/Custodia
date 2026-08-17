@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    One-time setup of the Entra app registration that backs the GwinnIQ Copilot Studio
+    One-time setup of the Entra app registration that backs the FOIAIQ Copilot Studio
     custom connector.
 
 .DESCRIPTION
@@ -37,7 +37,7 @@
 
 [CmdletBinding()]
 param(
-    [string] $DisplayName = 'GwinnIQ eDiscovery Connector',
+    [string] $DisplayName = 'FOIAIQ eDiscovery Connector',
     [string] $TenantId    = '<TENANT-ID>',
     [int]    $SecretYears = 1
 )
@@ -148,10 +148,10 @@ $apiPayload = @{
                 value                   = 'access_as_user'
                 type                    = 'User'   # Admins and users
                 isEnabled               = $true
-                adminConsentDisplayName = 'Access GwinnIQ eDiscovery as the signed-in user'
+                adminConsentDisplayName = 'Access FOIAIQ eDiscovery as the signed-in user'
                 adminConsentDescription = 'Allows the connector to call the Microsoft Graph eDiscovery API on behalf of the signed-in reviewer, limited to that reviewer''s own Purview permissions.'
                 userConsentDisplayName  = 'Access eDiscovery on your behalf'
-                userConsentDescription  = 'Allows GwinnIQ to read and create eDiscovery cases and searches on your behalf. It cannot exceed your own Purview eDiscovery permissions.'
+                userConsentDescription  = 'Allows FOIAIQ to read and create eDiscovery cases and searches on your behalf. It cannot exceed your own Purview eDiscovery permissions.'
             }
         )
         preAuthorizedApplications = @(
@@ -163,7 +163,7 @@ $apiPayload = @{
     }
 }
 
-$apiPayloadPath = Join-Path ([System.IO.Path]::GetTempPath()) "gwinniq-api-$([guid]::NewGuid()).json"
+$apiPayloadPath = Join-Path ([System.IO.Path]::GetTempPath()) "foiaiq-api-$([guid]::NewGuid()).json"
 $apiPayload | ConvertTo-Json -Depth 10 | Set-Content -Path $apiPayloadPath -Encoding utf8
 
 try {
@@ -192,14 +192,14 @@ $cred = Invoke-AzJson @(
     'ad', 'app', 'credential', 'reset',
     '--id', $appId,
     '--years', "$SecretYears",
-    '--display-name', 'gwinniq-connector',
+    '--display-name', 'foiaiq-connector',
     '--only-show-errors'
 )
 
 # --- Summary ----------------------------------------------------------------------------
 Write-Host ''
 Write-Host '=========================================================' -ForegroundColor Green
-Write-Host ' GwinnIQ app registration complete' -ForegroundColor Green
+Write-Host ' FOIAIQ app registration complete' -ForegroundColor Green
 Write-Host '=========================================================' -ForegroundColor Green
 Write-Host ''
 Write-Host "Tenant ID:     $TenantId"
@@ -232,7 +232,7 @@ $localConfig = [ordered]@{
     createdUtc  = (Get-Date).ToUniversalTime().ToString('o')
 }
 $localConfig | ConvertTo-Json -Depth 5 |
-    Set-Content -Path (Join-Path $PSScriptRoot '..' 'gwinniq-app.local.json') -Encoding utf8
+    Set-Content -Path (Join-Path $PSScriptRoot '..' 'foiaiq-app.local.json') -Encoding utf8
 
 Write-Host ''
-Write-Host 'Non-secret identifiers written to gwinniq-app.local.json (git-ignored).' -ForegroundColor DarkGray
+Write-Host 'Non-secret identifiers written to foiaiq-app.local.json (git-ignored).' -ForegroundColor DarkGray

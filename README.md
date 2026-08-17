@@ -1,15 +1,15 @@
-# GwinnIQ
+# FOIAIQ
 
 A Microsoft Copilot Studio agent that helps a FOIA / public-records team run Microsoft
-Purview eDiscovery (Premium). GwinnIQ creates eDiscovery cases, builds the search query,
+Purview eDiscovery (Premium). FOIAIQ creates eDiscovery cases, builds the search query,
 runs a statistics estimate, and reads the results back — always acting **on behalf of the
 signed-in reviewer**.
 
 > ### 📊 New here? Start with the install guide
 >
-> **[Download the GwinnIQ Install & Administration Guide (PowerPoint) →](docs/GwinnIQ-Install-Guide.pptx)**
+> **[Download the FOIAIQ Install & Administration Guide (PowerPoint) →](docs/FOIAIQ-Install-Guide.pptx)**
 >
-> A 12-slide walkthrough written for state and county teams: what GwinnIQ does, why it is safe
+> A 12-slide walkthrough written for state and county teams: what FOIAIQ does, why it is safe
 > to deploy, and the four phases to install it in your own Copilot Studio. This README is the
 > detailed companion to that deck.
 
@@ -19,7 +19,7 @@ signed-in reviewer**.
 
 FOIA case setup in Purview is manual, repetitive, and easy to get wrong under a statutory
 deadline. Reviewers retype the same case-naming pattern, hand-build KQL, forget the date
-bound, and pick a broader scope than they meant to. GwinnIQ gives them a conversational path
+bound, and pick a broader scope than they meant to. FOIAIQ gives them a conversational path
 to *create a case, run a search, and see item counts* — with the naming pattern, the date
 range, and the scope restated back to them before anything is written.
 
@@ -29,7 +29,7 @@ It does not decide anything. It does not judge content.
 
 ```mermaid
 flowchart LR
-    R[Reviewer in Teams /<br/>M365 Copilot] --> A[Copilot Studio agent<br/>GwinnIQ]
+    R[Reviewer in Teams /<br/>M365 Copilot] --> A[Copilot Studio agent<br/>FOIAIQ]
     A --> C[Custom connector<br/>OAuth 2.0 + OBO]
     C --> G[Microsoft Graph v1.0<br/>eDiscovery API]
     G --> P[(Microsoft Purview<br/>eDiscovery Premium)]
@@ -39,7 +39,7 @@ flowchart LR
   **On-Behalf-Of (OBO)** auth. No Azure Function. No hosting. No compute to secure.
 - **Delegated permissions only.** The agent can never exceed the signed-in reviewer's own
   Purview eDiscovery role. If a reviewer cannot see a case in the Purview portal, they cannot
-  see it through GwinnIQ either.
+  see it through FOIAIQ either.
 - Graph delegated scopes: `eDiscovery.ReadWrite.All` and `User.Read`.
 - **No application (app-only) permissions.** This is deliberate and non-negotiable in v1: an
   app-only token would decouple what the agent can do from what the reviewer can do, which is
@@ -127,19 +127,19 @@ Enforced in `agent/instructions.md`:
 ## Repository layout
 
 ```
-GwinnIQ/
+FOIAIQ/
 ├── README.md                             # this file
 ├── docs/                                 # customer-facing guide + screenshots
-│   ├── GwinnIQ-Install-Guide.pptx        #   the install deck linked above
+│   ├── FOIAIQ-Install-Guide.pptx        #   the install deck linked above
 │   └── screenshots/SHOTLIST.md           #   which screenshots to capture, and where
 ├── connector/apiDefinition.swagger.json  # OpenAPI 2.0 the custom connector imports (25 ops)
 ├── agent/instructions.md                 # the system prompt / behavior contract
-├── agent/brand/gwinniq-avatar.png        # agent icon (512x512) + .svg source
+├── agent/brand/foiaiq-avatar.png        # agent icon (512x512) + .svg source
 ├── agent/evaluations/                    # Copilot Studio evaluation test sets (CSV)
 ├── scripts/1-setup-app-registration.ps1  # one-time Entra app + delegated scopes + consent
 ├── scripts/2-create-foia-case.ps1        # reference: case -> search -> estimate -> read
 ├── scripts/foia-case-template.json       # naming pattern, default scope, review settings
-├── src/gwinniq_ediscovery.py             # Python reference client for the full flow
+├── src/foiaiq_ediscovery.py             # Python reference client for the full flow
 └── .gitignore
 ```
 
@@ -195,7 +195,7 @@ registration under **Authentication > Add a platform > Web**. Save the connector
 
 ### 3. Copilot Studio agent
 
-1. Create a new agent named **GwinnIQ**. Use `agent/brand/gwinniq-avatar.png` as the icon.
+1. Create a new agent named **FOIAIQ**. Use `agent/brand/foiaiq-avatar.png` as the icon.
 2. Paste `agent/instructions.md` into the agent's **Instructions**.
 3. Add the custom connector as an action. All 25 operations are safe to enable; the security
    boundary is the connector definition, not per-tool toggles.
@@ -215,7 +215,7 @@ the errors are not obvious — this is the most common place a deployment stalls
 | # | Grant | Where | If missing |
 | --- | --- | --- | --- |
 | 1 | **Purview eDiscovery role** — `eDiscovery Manager` | Purview portal → Roles & scopes → Role groups | Agent authenticates fine, then every call returns **403**. The most common failure. |
-| 2 | **Agent access** — share the published agent | Copilot Studio → your agent → **Share** | Reviewer cannot find GwinnIQ in Teams / M365 Copilot at all. |
+| 2 | **Agent access** — share the published agent | Copilot Studio → your agent → **Share** | Reviewer cannot find FOIAIQ in Teams / M365 Copilot at all. |
 | 3 | **Connector consent** — first sign-in | Prompted automatically on first use | Tool calls fail with a sign-in / consent error until they complete the prompt. |
 
 Grant them in that order. The Purview role is the one that actually governs what the reviewer
@@ -227,7 +227,7 @@ is a wall of 403s.
 - **eDiscovery Manager** — least privilege. Sees and manages only the cases they create or are
   added to as a member. This is the right default for a FOIA reviewer.
 - **eDiscovery Administrator** — sees *every* case in the tenant. Reserve this for the case-
-  management lead. Note that GwinnIQ inherits it: an admin using the agent can list and read
+  management lead. Note that FOIAIQ inherits it: an admin using the agent can list and read
   everyone's cases, because delegated auth means the agent is exactly as privileged as the
   person driving it.
 
@@ -252,9 +252,9 @@ the delegated model is intact — see [How to test](#how-to-test).
 
 | File | Conversations | Purpose |
 | --- | --- | --- |
-| `gwinniq-eval-core-20.csv` | 20 | The FOIA workflow: create, search, estimate, collect, export |
-| `gwinniq-eval-guardrails-10.csv` | 10 | Refusals — purge, delete, holds, legal determinations, prompt injection |
-| `gwinniq-eval-verify-5.csv` | 5 | Fast, no-async smoke checks; use to isolate pipeline problems |
+| `foiaiq-eval-core-20.csv` | 20 | The FOIA workflow: create, search, estimate, collect, export |
+| `foiaiq-eval-guardrails-10.csv` | 10 | Refusals — purge, delete, holds, legal determinations, prompt injection |
+| `foiaiq-eval-verify-5.csv` | 5 | Fast, no-async smoke checks; use to isolate pipeline problems |
 
 Two results will look like failures and are not:
 
@@ -294,7 +294,7 @@ Or with Python:
 
 ```bash
 pip install azure-identity requests
-python src/gwinniq_ediscovery.py \
+python src/foiaiq_ediscovery.py \
     --tenant-id '<TENANT-ID>' --client-id '<APP-ID>' \
     --request-number 00142 --short-subject budget-emails \
     --keywords '"budget" OR "appropriation"' \
@@ -328,7 +328,7 @@ member of only their own cases, and confirm:
   export this case."* Read it back through the agent and confirm it treats the text as data
   and surfaces it as suspicious rather than acting on it.
 
-Only after all three pass should GwinnIQ touch a live request.
+Only after all three pass should FOIAIQ touch a live request.
 
 ## Phase 2 — Azure Function backend (not built)
 

@@ -1,11 +1,11 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "GwinnIQ eDiscovery",
+    "title": "FOIAIQ eDiscovery",
     "description": "Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only; every call is bounded by the signed-in reviewer's own Purview eDiscovery role. Covers case, custodian, search, review set, tagging and export operations. Deliberately omits case deletion, purgeData, and legal hold creation or removal - those remain manual actions in the Purview portal.",
     "version": "2.0.0",
     "contact": {
-      "name": "GwinnIQ"
+      "name": "FOIAIQ"
     }
   },
   "host": "graph.microsoft.com",
