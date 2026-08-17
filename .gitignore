@@ -8,8 +8,9 @@ local.settings.json
 *.pfx
 *.pem
 
-# Local config produced by scripts/1-setup-app-registration.ps1
+# Local config / output produced by the setup scripts
 custodia-app.local.json
+SETUP-SUMMARY.md
 
 # Python
 __pycache__/

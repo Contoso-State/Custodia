@@ -1,0 +1,51 @@
+{
+  "properties": {
+    "capabilities": [
+      "actions"
+    ],
+    "connectionParameters": {
+      "token": {
+        "type": "oauthSetting",
+        "oAuthSettings": {
+          "identityProvider": "aad",
+          "clientId": "<APP-ID>",
+          "scopes": [
+            "eDiscovery.ReadWrite.All",
+            "User.Read"
+          ],
+          "redirectMode": "Global",
+          "redirectUrl": "https://global.consent.azure-apim.net/redirect",
+          "properties": {
+            "IsFirstParty": "False",
+            "AzureActiveDirectoryResourceId": "https://graph.microsoft.com",
+            "IsOnbehalfofLoginSupported": true
+          },
+          "customParameters": {
+            "loginUri": {
+              "value": "https://login.microsoftonline.com"
+            },
+            "tenantId": {
+              "value": "<TENANT-ID>"
+            },
+            "resourceUri": {
+              "value": "https://graph.microsoft.com"
+            }
+          }
+        }
+      },
+      "token:TenantId": {
+        "type": "string",
+        "metadata": {
+          "sourceType": "AzureActiveDirectoryTenant"
+        },
+        "uiDefinition": {
+          "constraints": {
+            "required": "false",
+            "hidden": "true"
+          }
+        }
+      }
+    },
+    "iconBrandColor": "#1E2761"
+  }
+}

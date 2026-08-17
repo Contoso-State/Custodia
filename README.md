@@ -148,11 +148,15 @@ Custodia/
 │   ├── Custodia-Install-Guide.pptx        #   the install deck linked above
 │   └── screenshots/SHOTLIST.md           #   which screenshots to capture, and where
 ├── connector/apiDefinition.swagger.json  # OpenAPI 2.0 the custom connector imports (25 ops)
+├── connector/apiProperties.json          # OAuth 2.0 / Entra ID / on-behalf-of connector config
 ├── agent/instructions.md                 # the system prompt / behavior contract
 ├── agent/brand/custodia-avatar.png        # agent icon (512x512) + .svg source
 ├── agent/evaluations/                    # Copilot Studio evaluation test sets (CSV)
-├── scripts/1-setup-app-registration.ps1  # one-time Entra app + delegated scopes + consent
+├── scripts/0-install-everything.ps1      # START HERE — one script, minimal manual steps
+├── scripts/1-setup-app-registration.ps1  # Entra app + delegated scopes + consent + redirect URI
 ├── scripts/2-create-foia-case.ps1        # reference: case -> search -> estimate -> read
+├── scripts/3-create-custom-connector.ps1 # creates the Power Platform custom connector for you
+├── scripts/4-test-setup.ps1              # plain-language PASS/WARN/FAIL health check
 ├── scripts/foia-case-template.json       # naming pattern, default scope, review settings
 ├── src/custodia_ediscovery.py             # Python reference client for the full flow
 └── .gitignore
@@ -160,7 +164,47 @@ Custodia/
 
 ## Setup
 
-### Prerequisites
+### 🚀 Automated setup (recommended)
+
+Hand this repository to whoever administers your Microsoft 365 tenant and Power Platform
+environment — they do not need to be a developer. From a PowerShell prompt in this folder:
+
+```powershell
+./scripts/0-install-everything.ps1
+```
+
+It asks two questions (your tenant ID, and your Power Platform environment ID) and then does
+the rest:
+
+- Installs the Azure CLI and Python via winget if either is missing (asks first).
+- Creates the Entra app registration with delegated Graph permissions, tenant-wide admin
+  consent, the exposed API scope, and the Power Platform redirect URI.
+- Creates the Power Platform custom connector itself, fully wired for on-behalf-of auth —
+  no Security-tab clicking, no copying a redirect URL back and forth.
+- Runs a plain-language health check and writes `SETUP-SUMMARY.md` (local only, git-ignored)
+  listing exactly what it did and what is left.
+
+It needs an account with rights to create app registrations and grant admin consent
+(Application Administrator / Cloud Application Administrator, plus Privileged Role
+Administrator or Global Administrator for consent), and maker access to the target Power
+Platform environment. It is safe to re-run — it detects prior setup and will not duplicate
+the app registration or rotate a secret out from under an already-configured connector.
+
+**What it cannot automate, on purpose:** creating the agent inside Copilot Studio and pasting
+in `agent/instructions.md`, and assigning the Purview eDiscovery Manager role to reviewers.
+Those are short, deliberate, human steps — covered in [3. Copilot Studio agent](#3-copilot-studio-agent)
+and [4. Grant a reviewer access](#4-grant-a-reviewer-access) below, and summarized for you
+at the bottom of `SETUP-SUMMARY.md` after the script runs.
+
+Run `./scripts/4-test-setup.ps1` any time afterward to re-check the setup without changing
+anything.
+
+### Manual / step-by-step setup
+
+Use this if you'd rather run each step yourself, understand exactly what each one does, or
+the automated script can't run in your environment (for example, no winget).
+
+#### Prerequisites
 
 - A Microsoft 365 tenant with **Microsoft Purview eDiscovery (Premium)**.
 - Reviewers assigned the **eDiscovery Manager** Purview role (least privilege — members can
@@ -185,13 +229,26 @@ The script creates a **single-tenant** app and:
    `fe053c5f-3692-4f14-aef2-ee34fc081cae` as an authorized client application for that
    scope. This is the step that makes on-behalf-of login work for a Power Platform connector;
    without it OBO fails at token exchange.
-5. Creates a client secret and prints it **once**.
+5. Registers the well-known Power Platform OAuth redirect URI
+   (`https://global.consent.azure-apim.net/redirect`) under **Authentication > Web** — the
+   same fixed endpoint every AAD-authenticated custom connector on the global cloud uses, so
+   there is nothing to copy back from the connector afterward.
+6. Creates a client secret and prints it **once**.
 
-Verify in the portal that **no application (app-only) permissions** were added.
+Verify in the portal that **no application (app-only) permissions** were added. The script is
+safe to re-run: it reuses an existing app by name rather than duplicating it, and only issues
+a new client secret for a brand-new app (pass `-Force -RotateSecret` to deliberately rotate one
+for an existing app).
 
 ### 2. Custom connector
 
-In the Power Platform admin experience, create a custom connector by importing
+**Automated:** `./scripts/3-create-custom-connector.ps1 -EnvironmentId '<ENVIRONMENT-GUID>'`
+creates the connector directly from `connector/apiDefinition.swagger.json` and
+`connector/apiProperties.json`, using the client ID / tenant ID recorded by step 1 and the
+client secret you provide when prompted. The generated connector is already configured exactly
+as described below — nothing left to set by hand.
+
+**By hand:** in the Power Platform admin experience, create a custom connector by importing
 `connector/apiDefinition.swagger.json`, then on the **Security** tab:
 
 | Setting | Value |
@@ -205,8 +262,9 @@ In the Power Platform admin experience, create a custom connector by importing
 | Enable on-behalf-of login | **true** |
 | Scope | `eDiscovery.ReadWrite.All User.Read` |
 
-Save the connector, copy the **generated Redirect URL**, and paste it back into the app
-registration under **Authentication > Add a platform > Web**. Save the connector again.
+Save the connector. Its generated Redirect URL is the same
+`https://global.consent.azure-apim.net/redirect` step 1 already registered — no need to copy
+anything back into the app registration.
 
 ### 3. Copilot Studio agent
 
