@@ -447,5 +447,7 @@ table there too.
 - Valid `dataSourceScopes`: `none`, `allTenantMailboxes`, `allTenantSites`,
   `allCaseCustodians`, `allCaseNoncustodialDataSources`.
 - This repository contains **no** tenant IDs, app IDs, organization names, or addresses. All
-  such values are placeholders (`<TENANT-ID>`, `<APP-ID>`). Keep it that way — and keep the
-  repository **private**.
+  such values are placeholders (`<TENANT-ID>`, `<APP-ID>`). Keep it that way — this repository
+  is **public**, so nothing tenant-specific should ever be committed here. Anything that
+  identifies a real deployment (tenant ID, app ID, environment ID, secrets) belongs only in
+  your own local, git-ignored `custodia-app.local.json` / `SETUP-SUMMARY.md`, never in a commit.
