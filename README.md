@@ -20,6 +20,14 @@ Purview eDiscovery (Premium). Custodia creates eDiscovery cases, builds the sear
 runs a statistics estimate, and reads the results back — always acting **on behalf of the
 signed-in reviewer**.
 
+> ### 🌐 See it in action
+>
+> **[contoso-state.github.io/Custodia →](https://contoso-state.github.io/Custodia/)**
+>
+> A one-page walkthrough of a real FOIA request coming in by email and turning into a case,
+> a search, and an item-count estimate — with the same restate-and-confirm behavior the agent
+> actually uses. Source is in `docs/` (`docs/index.html`), no build step required.
+>
 > ### 📊 New here? Start with the install guide
 >
 > **[Download the Custodia Install & Administration Guide (PowerPoint) →](docs/Custodia-Install-Guide.pptx)**

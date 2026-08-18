@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Custodia — Intelligent, guardrailed eDiscovery for public-records teams</title>
+<meta name="description" content="Custodia is a Microsoft Copilot Studio agent that helps FOIA and public-records teams run Microsoft Purview eDiscovery — conversationally, on the reviewer's own delegated permissions, with nothing destructive in reach." />
+<meta property="og:title" content="Custodia — Intelligent, guardrailed eDiscovery for public-records teams" />
+<meta property="og:description" content="Ask Custodia to set up a FOIA case, build the search, and estimate the results — it restates everything and waits for your confirmation before it creates anything." />
+<meta property="og:image" content="custodia-social-card.png" />
+<meta name="theme-color" content="#0d1230" />
+<link rel="icon" href="custodia-avatar.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/site.css" />
+</head>
+<body>
+
+<!-- ============ TOP NAV ============ -->
+<header class="topnav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <img src="custodia-avatar.png" alt="Custodia" />
+      Custodia
+    </a>
+    <button class="navtoggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <nav class="navlinks">
+      <a href="#demo">See it in action</a>
+      <a href="#what-you-get">What you get</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#safety">Safety &amp; guardrails</a>
+      <a href="#get-started">Get started</a>
+      <a class="cta" href="https://github.com/Contoso-State/Custodia">GitHub →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Microsoft Copilot Studio · Purview eDiscovery (Premium)</span>
+      <h1>Ask for a FOIA case. Get a case, a search, and a real number back.</h1>
+      <p class="lede">
+        Custodia is a Copilot Studio agent that turns an incoming public-records request into a
+        properly named eDiscovery case, a bounded KQL search, and an item-count estimate —
+        in one conversation, restated and confirmed before anything is created, and never
+        exceeding the reviewer's own Purview role.
+      </p>
+      <div class="badgerow">
+        <span class="badge">Delegated on-behalf-of auth</span>
+        <span class="badge">No application permissions</span>
+        <span class="badge">Read + create only</span>
+        <span class="badge">Nothing destructive</span>
+      </div>
+      <div class="herobtns">
+        <a class="btn btn-gold" href="#demo">Watch the FOIA workflow ↓</a>
+        <a class="btn btn-ghost" href="https://github.com/Contoso-State/Custodia">View the repository</a>
+      </div>
+    </div>
+    <div class="hero-avatar-card">
+      <img src="custodia-avatar.png" alt="Custodia agent avatar" />
+      <div class="name">Custodia</div>
+      <div class="role">Public-records &amp; eDiscovery agent</div>
+      <div class="hero-stats">
+        <div class="stat"><b>25</b><span>Graph ops exposed</span></div>
+        <div class="stat"><b>0</b><span>Delete / purge ops</span></div>
+        <div class="stat"><b>2×</b><span>Confirm before create</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALLOUTS ============ -->
+<div class="wrap callouts">
+  <div class="callout important">
+    <div class="callout-title">ℹ️ What this is</div>
+    <p>
+      Custodia is a <strong>delegated-auth connector and agent template</strong>, not a
+      standing service. Every call it makes runs as the signed-in reviewer, through their own
+      Purview eDiscovery role — the agent can never see or do more than the person driving it
+      already could in the Purview portal. There is no service identity, no app-only token,
+      and no shared credential anywhere in this design.
+    </p>
+  </div>
+  <div class="callout warning">
+    <div class="callout-title">⚠️ AI disclosure &amp; disclaimer</div>
+    <p>
+      Custodia uses generative AI to construct search queries and summarize results. It can
+      make mistakes — verify case setup, query logic, and item counts independently before
+      relying on them for a statutory response. It never decides whether a record is
+      responsive, exempt, or privileged, and it has no tool that can apply that determination
+      even if asked. This site is a demonstration of the repository's design; deploy it in
+      your own tenant and test it against synthetic data first.
+      <strong>Not affiliated with Microsoft.</strong> Microsoft, Microsoft Purview, Microsoft
+      Graph, and Copilot Studio are trademarks of Microsoft Corporation.
+    </p>
+  </div>
+</div>
+
+<!-- ============ WHAT YOU GET ============ -->
+<section id="what-you-get">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">What you get</span>
+      <h2>The routine 80% of case setup, handled conversationally</h2>
+      <p>
+        Custodia doesn't replace the FOIA team's judgment — it removes the tedious, error-prone
+        setup that happens before judgment is even possible: naming the case correctly, writing
+        a bounded query, and knowing roughly how big the request is before you commit to it.
+      </p>
+    </div>
+    <div class="grid3">
+      <div class="card">
+        <div class="icon">✎</div>
+        <h3>Consistent case naming</h3>
+        <p>Every case follows the same pattern — request number, year, short subject — instead
+          of whatever a reviewer typed under deadline pressure.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⌘</div>
+        <h3>Query built from plain language</h3>
+        <p>Describe the request in your own words; Custodia writes the bounded KQL, always
+          anchored to the requested date range.</p>
+      </div>
+      <div class="card">
+        <div class="icon">Σ</div>
+        <h3>Estimate before you commit</h3>
+        <p>Item count and mailbox/site hits come back before anything is collected, so scope
+          decisions are made against a known size, not a guess.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✓</div>
+        <h3>Restate, then confirm</h3>
+        <p>Case name, query, date range, and scope are read back in full before every create.
+          One confirmation authorizes exactly one action — never a chain.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⛔</div>
+        <h3>Nothing destructive is reachable</h3>
+        <p>Purge, delete, legal-hold changes, and document tagging aren't just discouraged —
+          they're not defined in the connector. The agent has no tool that could do them.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⚖</div>
+        <h3>Legal calls stay human</h3>
+        <p>Responsiveness, exemptions, and privilege are never decided by Custodia — and it
+          can't apply a document tag even if you ask it to.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEMO ============ -->
+<section class="alt" id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">See it in action</span>
+      <h2>A FOIA request comes in by email. Here's the whole conversation.</h2>
+      <p>
+        This is a real transcript shape — the operations, confirmations, and async estimate
+        behavior all match how the connector and agent instructions actually work. Case,
+        search, and counts below are illustrative, not from a real tenant.
+      </p>
+    </div>
+
+    <div class="demo-shell">
+      <!-- Incoming email -->
+      <div class="email-card">
+        <div class="email-head">
+          <span class="tag">Incoming · Records Request Mailbox</span>
+        </div>
+        <div class="email-meta">
+          <div><b>From:</b> resident@example.com</div>
+          <div><b>To:</b> public-records@fairview-county.example.gov</div>
+          <div><b>Subject:</b> Public Records Request #00187 — Riverside Ave rezoning</div>
+          <div><b>Received:</b> Mon, Jun 1, 2026 9:14 AM</div>
+        </div>
+        <div class="email-body">
+          <p>Hello,</p>
+          <p>
+            Under the Public Records Act, I am requesting copies of all correspondence
+            regarding the <strong>Riverside Avenue rezoning proposal</strong>, including any
+            discussion of the related zoning variance, exchanged
+            <strong>between January 1, 2026 and June 30, 2026</strong>.
+          </p>
+          <p>Please let me know if you need anything further to process this request.</p>
+          <div class="email-signature">— Sent via the county public-records portal</div>
+        </div>
+      </div>
+
+      <!-- Chat transcript -->
+      <div class="chat-shell">
+        <div class="chat-titlebar">
+          <img src="custodia-avatar.png" alt="" />
+          Custodia · Microsoft Teams
+          <span class="dot"></span>
+        </div>
+        <div class="chat-body">
+
+          <div class="msg user">
+            <div class="avatar">JR</div>
+            <div class="bubble">
+              <p>New request came in — #00187, Riverside Ave rezoning. Set up the case for
+              the correspondence January through June 2026.</p>
+            </div>
+          </div>
+
+          <div class="msg agent">
+            <div class="avatar"><img src="custodia-avatar.png" alt="" /></div>
+            <div class="bubble">
+              <p>Before I create anything, here's exactly what I'll set up:</p>
+              <ul>
+                <li><b>Case name:</b> <code>FOIA-2026-00187-riverside-rezoning</code></li>
+                <li><b>Description:</b> Public-records request 00187. Requested date range
+                  2026-01-01 to 2026-06-30.</li>
+              </ul>
+              <p>Nothing is created until you confirm.</p>
+              <span class="confirm-pill">⏸ Waiting on your confirmation</span>
+            </div>
+          </div>
+
+          <div class="msg user">
+            <div class="avatar">JR</div>
+            <div class="bubble"><p>Confirmed.</p></div>
+          </div>
+
+          <div class="msg agent">
+            <div class="avatar"><img src="custodia-avatar.png" alt="" /></div>
+            <div class="bubble">
+              <div class="tool-call"><span class="op">POST</span> /security/cases/ediscoveryCases <span class="status">→ 201 Created</span></div>
+              <p style="margin-top:10px">
+                Case created — <code>FOIA-2026-00187-riverside-rezoning</code>.
+              </p>
+              <p>Now the search. This is a separate action from creating the case, so I need a
+              separate confirmation:</p>
+              <ul>
+                <li><b>Search name:</b> <code>FOIA-2026-00187-riverside-rezoning-search-01</code></li>
+                <li><b>Query:</b> <code>("Riverside Ave" OR "rezoning" OR "zoning variance") AND (received&gt;=2026-01-01 AND received&lt;=2026-06-30)</code></li>
+                <li><b>Scope:</b> <code>none</code> — I'll attach the mailboxes you name rather
+                  than searching the whole tenant.</li>
+              </ul>
+              <span class="confirm-pill">⏸ Waiting on your confirmation</span>
+            </div>
+          </div>
+
+          <div class="msg user">
+            <div class="avatar">JR</div>
+            <div class="bubble"><p>Confirmed — add the Planning Dept shared mailbox and my own.</p></div>
+          </div>
+
+          <div class="msg agent">
+            <div class="avatar"><img src="custodia-avatar.png" alt="" /></div>
+            <div class="bubble">
+              <div class="tool-call"><span class="op">POST</span> /security/cases/ediscoveryCases/{caseId}/searches <span class="status">→ 201 Created</span></div>
+              <p style="margin-top:10px">Search created. Running an estimate before we talk
+              about collecting anything:</p>
+              <div class="tool-call"><span class="op">POST</span> .../searches/{searchId}/estimateStatistics <span class="pending">→ 202 Accepted</span></div>
+              <div class="tool-call"><span class="op">GET</span> .../operations <span class="pending">→ running…</span></div>
+              <div class="tool-call"><span class="op">GET</span> .../lastEstimateStatisticsOperation <span class="status">→ 200 OK</span></div>
+              <p style="margin-top:10px">Estimate complete:</p>
+              <div class="result-card">
+                <div class="stat"><b>1,842</b><span>Indexed items</span></div>
+                <div class="stat"><b>2</b><span>Mailboxes with hits</span></div>
+                <div class="stat"><b>0</b><span>Unindexed items</span></div>
+              </div>
+              <p style="margin-top:10px">
+                That's an <strong>estimate</strong>, not a collection — nothing has been
+                pulled into a review set, and nothing has left Purview. Say the word if you
+                want to collect these into a review set next; that's a separate, more heavily
+                guarded confirmation.
+              </p>
+            </div>
+          </div>
+
+        </div>
+        <div class="chat-note">
+          Every create above required its own explicit confirmation. Estimating is
+          asynchronous — Custodia polls until it finishes rather than guessing at a result.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ARCHITECTURE ============ -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Architecture</span>
+      <h2>Direct to Microsoft Graph. No service to secure.</h2>
+      <p>
+        v1 is deliberately the simplest thing that works: a Copilot Studio custom connector
+        calling Microsoft Graph directly, with on-behalf-of delegated auth doing all the
+        access-control work. No Azure Function, no hosting, no compute in the middle.
+      </p>
+    </div>
+    <div class="arch-card">
+      <div class="mermaid">
+graph LR
+    R["Reviewer in Teams /<br/>Microsoft 365 Copilot"] --> A["Copilot Studio agent<br/><b>Custodia</b>"]
+    A -->|"OAuth 2.0 + on-behalf-of"| C["Custom connector"]
+    C -->|"delegated token,<br/>reviewer's own scopes"| G["Microsoft Graph v1.0<br/>eDiscovery API"]
+    G --> P[("Microsoft Purview<br/>eDiscovery Premium")]
+      </div>
+      <div class="arch-notes">
+        <div class="note">
+          <h4>Delegated, always</h4>
+          <p>Graph scopes: <code>eDiscovery.ReadWrite.All</code> and <code>User.Read</code>,
+          both delegated. No application (app-only) permission exists anywhere in the app
+          registration.</p>
+        </div>
+        <div class="note">
+          <h4>On-behalf-of, not shared</h4>
+          <p>Each reviewer authenticates with their own credentials. There is no
+          maker-provided connection — get that wrong and the whole permission model
+          silently collapses onto one identity.</p>
+        </div>
+        <div class="note">
+          <h4>The connector is the boundary</h4>
+          <p>Purge, delete, legal-hold changes, and document tagging aren't blocked by a
+          prompt — they simply don't exist in <code>apiDefinition.swagger.json</code>.</p>
+        </div>
+        <div class="note">
+          <h4>Phase 2, on paper only</h4>
+          <p>An Azure Function backend is documented as a future option for code-enforced
+          approval workflows on export — not built, because it isn't needed for read + create.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SAFETY ============ -->
+<section class="alt" id="safety">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Safety &amp; guardrails</span>
+      <h2>The primary control is omission, not a prompt</h2>
+      <p>
+        Guardrails in <code>agent/instructions.md</code> are the second layer. The connector
+        surface — what operations even exist — is the first, and it's the one that actually
+        holds under a jailbreak attempt or a confused-deputy prompt.
+      </p>
+    </div>
+    <div class="safety-grid">
+      <div class="safety-col allow">
+        <h3>✓ What Custodia can do</h3>
+        <ul class="safety-list">
+          <li><b>List &amp; read cases, searches, custodians</b><span>Scoped to whatever the signed-in reviewer's Purview role already permits.</span></li>
+          <li><b>Create a case, a search, a custodian</b><span>Always restated in full and confirmed before it happens — one action per confirmation.</span></li>
+          <li><b>Estimate search statistics</b><span>Item counts and mailbox/site hits, polled asynchronously to completion.</span></li>
+          <li><b>Create and list case tags</b><span>The labels themselves, as workflow scaffolding — never applied to a document.</span></li>
+          <li><b>Read legal holds</b><span>So the agent can warn a reviewer a custodian is on hold — never change one.</span></li>
+        </ul>
+      </div>
+      <div class="safety-col deny">
+        <h3>✕ What's deliberately absent</h3>
+        <ul class="safety-list">
+          <li><b>purgeData</b><span>Destroys source content in mailboxes and Teams. Irreversible — not in the connector.</span></li>
+          <li><b>Any delete</b><span>Cases, searches, review sets, custodians — destroying case state destroys the audit trail.</span></li>
+          <li><b>Legal hold changes</b><span>Creating, updating, or releasing a hold under an open request risks spoliation.</span></li>
+          <li><b>Applying a tag to a document</b><span>Responsive / non-responsive / exempt is a legal determination the agent will not make.</span></li>
+          <li><b>Any application (app-only) permission</b><span>The agent can never exceed the signed-in reviewer's own role — by design, not by policy.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GET STARTED ============ -->
+<section id="get-started">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="kicker">Get started</span>
+      <h2>One script does most of the setup for you</h2>
+      <p>
+        Hand the repository to whoever administers your tenant and Power Platform environment.
+        They don't need to be a developer to run it.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <h3>Run the installer</h3>
+        <p>Creates the Entra app registration, delegated Graph permissions, admin consent, and
+        the Power Platform custom connector — no portal clicking required.</p>
+      </div>
+      <div class="step">
+        <h3>Create the agent in Copilot Studio</h3>
+        <p>Paste in <code>agent/instructions.md</code>, add the connector as an action, and
+        require each user to sign in with their own credentials.</p>
+      </div>
+      <div class="step">
+        <h3>Grant reviewer access</h3>
+        <p>Assign the Purview <b>eDiscovery Manager</b> role deliberately, per reviewer — then
+        test the permission boundary before pointing it at a real request.</p>
+      </div>
+    </div>
+    <div class="code-panel">
+      <div><span class="prompt">PS&gt;</span> ./scripts/0-install-everything.ps1</div>
+      <div style="opacity:.6">&nbsp;</div>
+      <div style="opacity:.85">Checking prerequisites …</div>
+      <div style="opacity:.85">Creating the Entra app registration …</div>
+      <div style="opacity:.85">Creating the Power Platform custom connector …</div>
+      <div style="opacity:.85">Running the health check … <span style="color:#7fd8a4">all checks passed</span></div>
+      <div style="opacity:.85">Summary written to SETUP-SUMMARY.md</div>
+    </div>
+
+    <div class="cta-band" style="margin-top:48px">
+      <div>
+        <h2>Read the repository first</h2>
+        <p>Full setup guide, safety scope, evaluation sets, and the Phase 2 Azure Function
+        option — all documented in the README.</p>
+      </div>
+      <a class="btn btn-gold" href="https://github.com/Contoso-State/Custodia">View on GitHub →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="fbrand"><img src="custodia-avatar.png" alt="" /> Custodia</div>
+      <div class="flinks">
+        <a href="https://github.com/Contoso-State/Custodia">GitHub</a>
+        <a href="https://github.com/Contoso-State/Custodia#readme">README</a>
+        <a href="Custodia-Install-Guide.pptx">Install guide (PPTX)</a>
+        <a href="#safety">Safety &amp; guardrails</a>
+      </div>
+    </div>
+    <div class="disclaimer">
+      <p>
+        <b>AI disclosure &amp; disclaimer:</b> Custodia uses generative AI to help construct
+        eDiscovery search queries and summarize Purview results. AI models can make mistakes
+        or misinterpret a request — verify case setup, query logic, and reported counts
+        independently before relying on them for a statutory public-records response. Custodia
+        is a starting-point template, not a certified or supported product; test it in a
+        non-production tenant against synthetic data before using it on a real request.
+      </p>
+      <p>
+        <b>Not affiliated with Microsoft.</b> This is an independent project — not affiliated
+        with, endorsed by, or sponsored by Microsoft. Any organization or place names used on
+        this page (including "Fairview County") are fictitious, used only for illustration.
+        Microsoft, Microsoft Purview, Microsoft Graph, Microsoft 365 Copilot, and Copilot
+        Studio are trademarks of Microsoft Corporation.
+      </p>
+      <p class="copyright">© 2026 Custodia. Repository access is private; contact the maintainer for access.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="assets/site.js"></script>
+</body>
+</html>
