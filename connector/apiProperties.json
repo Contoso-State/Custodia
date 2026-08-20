@@ -11,7 +11,8 @@
           "clientId": "<APP-ID>",
           "scopes": [
             "eDiscovery.ReadWrite.All",
-            "User.Read"
+            "User.Read",
+            "offline_access"
           ],
           "redirectMode": "Global",
           "redirectUrl": "https://global.consent.azure-apim.net/redirect",

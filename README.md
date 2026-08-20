@@ -158,6 +158,7 @@ Custodia/
 ├── connector/apiDefinition.swagger.json  # OpenAPI 2.0 the custom connector imports (25 ops)
 ├── connector/apiProperties.json          # OAuth 2.0 / Entra ID / on-behalf-of connector config
 ├── agent/instructions.md                 # the system prompt / behavior contract
+├── agent/greeting-and-prompts.md          # greeting message, suggested prompts, consent-prompt FAQ
 ├── agent/brand/custodia-avatar.png        # agent icon (512x512) + .svg source
 ├── agent/evaluations/                    # Copilot Studio evaluation test sets (CSV)
 ├── scripts/0-install-everything.ps1      # START HERE — one script, minimal manual steps
@@ -306,7 +307,11 @@ by the prompt.
    model onto one identity.
 5. Upload `agent/evaluations/*.csv` under **Evaluate** and run them. See
    [Evaluating the agent](#evaluating-the-agent) for the two grader caveats.
-6. Publish to Microsoft 365 Copilot / Teams.
+6. Under **Settings → Greeting & prompts**, paste the greeting message and suggested
+   prompts from `agent/greeting-and-prompts.md`. That file also explains why the
+   "Allow this agent to proceed?" card appears once per tool and how it differs from
+   the `x-openai-isConsequential` write-confirmation flow.
+7. Publish to Microsoft 365 Copilot / Teams.
 
 ### 4. Grant a reviewer access
 
@@ -318,6 +323,16 @@ the errors are not obvious — this is the most common place a deployment stalls
 | 1 | **Purview eDiscovery role** — `eDiscovery Manager` | Purview portal → Roles & scopes → Role groups | Agent authenticates fine, then every call returns **403**. The most common failure. |
 | 2 | **Agent access** — share the published agent | Copilot Studio → your agent → **Share** | Reviewer cannot find Custodia in Teams / M365 Copilot at all. |
 | 3 | **Connector consent** — first sign-in | Prompted automatically on first use | Tool calls fail with a sign-in / consent error until they complete the prompt. |
+
+Expect the consent card ("Permission Required — Allow this agent to proceed?") once
+**per distinct tool**, the first time each is used in a session — not once per call, and
+not once for the whole connector. That's Microsoft Entra ID's on-behalf-of consent
+model working as intended, and it's a separate mechanism from the write-confirmation
+prompts the agent itself asks for. See
+[`agent/greeting-and-prompts.md`](agent/greeting-and-prompts.md#why-reads-dont-prompt-for-permission-but-allow-this-agent-to-proceed-still-shows-up-once-per-tool)
+for the full explanation, and make sure the connector's Scope includes
+`offline_access` (already set in `connector/apiProperties.json`) so a refresh token
+gets issued and granted tools don't need to re-consent after their access token expires.
 
 Grant them in that order. The Purview role is the one that actually governs what the reviewer
 can see, and it must exist *before* they first use the agent — otherwise their first experience
