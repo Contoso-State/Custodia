@@ -274,6 +274,26 @@ Save the connector. Its generated Redirect URL is the same
 `https://global.consent.azure-apim.net/redirect` step 1 already registered — no need to copy
 anything back into the app registration.
 
+**Already have a connector from an older copy of this repo?** Re-import
+`connector/apiDefinition.swagger.json` (Power Platform: your connector → **Edit** → **1. General**
+→ update the swagger), or re-run `scripts/3-create-custom-connector.ps1 -EnvironmentId
+'<ENVIRONMENT-GUID>'` — it reads the connector ID `custodia-app.local.json` recorded from your
+first run and updates that connector in place rather than creating a duplicate. Versions
+before `2.1.0` are missing the `x-openai-isConsequential` flags below and will prompt for
+per-call approval on every read, not just on creates.
+
+**Why read calls don't need a permission prompt.** Microsoft 365 Copilot asks the user to
+approve a connector action the first time it's used, and again on every call unless the
+operation is marked non-consequential. `apiDefinition.swagger.json` sets
+`x-openai-isConsequential: false` on every read-only operation (`ListCases`, `GetCase`,
+`ListSearches`, and so on) and on `EstimateSearchStatistics` — estimating doesn't change any
+case data, and `agent/instructions.md` never asks the reviewer to separately confirm it. Every
+operation that creates, updates, closes, collects, or exports keeps
+`x-openai-isConsequential: true` and will still prompt every time — that's not a bug, it's
+the same confirm-before-write control described in
+[Behavioral guardrails](#behavioral-guardrails), just enforced by the platform instead of only
+by the prompt.
+
 ### 3. Copilot Studio agent
 
 1. Create a new agent named **Custodia**. Use `agent/brand/custodia-avatar.png` as the icon.

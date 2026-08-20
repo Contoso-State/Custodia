@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Creates the Custodia custom connector in a Power Platform environment, fully configured
-    for on-behalf-of (OBO) delegated auth against Microsoft Graph.
+    Creates or updates the Custodia custom connector in a Power Platform environment, fully
+    configured for on-behalf-of (OBO) delegated auth against Microsoft Graph.
 
 .DESCRIPTION
     Automates the "custom connector" step that would otherwise be done by hand in the maker
     portal's Security tab. Uses paconn (the Power Platform custom-connector CLI documented at
-    https://learn.microsoft.com/connectors/custom-connectors/paconn-cli) to create a connector
-    from:
+    https://learn.microsoft.com/connectors/custom-connectors/paconn-cli) to create or update a
+    connector from:
 
       - connector/apiDefinition.swagger.json  (the 25 allowed eDiscovery operations)
       - connector/apiProperties.json          (OAuth 2.0 / Microsoft Entra ID / OBO settings)
@@ -19,6 +19,11 @@
     https://global.consent.azure-apim.net/redirect that scripts/1-setup-app-registration.ps1
     already registered on the app. There is nothing to copy back and forth between the two
     portals.
+
+    Safe to re-run: if custodia-app.local.json (or -ConnectorId) already identifies a connector
+    this script created before, it updates that connector in place instead of creating a
+    duplicate. Existing Copilot Studio agents that already use the connector pick up the
+    change automatically — nothing to redo there.
 
     Requires Python 3.8+ (to install and run paconn) and a Power Platform environment you
     are a maker in. Installs paconn with pip if it is not already present.
@@ -43,6 +48,13 @@
 .PARAMETER ConnectorName
     Display name for the custom connector.
 
+.PARAMETER ConnectorId
+    ID of an existing custom connector to update in place instead of creating a new one.
+    Defaults to the value recorded in custodia-app.local.json by a prior run of this script.
+    Pass this (or let it default) when you're re-running the script to pick up a swagger
+    change, such as the confirmation-prompt fix in connector v2.1.0 — otherwise a second,
+    duplicate connector is created.
+
 .EXAMPLE
     ./3-create-custom-connector.ps1 -EnvironmentId '<ENVIRONMENT-GUID>' -ClientSecret $secret
 #>
@@ -53,7 +65,8 @@ param(
     [string]                       $TenantId,
     [string]                       $ClientId,
     [Security.SecureString]        $ClientSecret,
-    [string]                       $ConnectorName = 'Custodia eDiscovery'
+    [string]                       $ConnectorName = 'Custodia eDiscovery',
+    [string]                       $ConnectorId
 )
 
 $ErrorActionPreference = 'Stop'
@@ -68,11 +81,12 @@ foreach ($required in @($swaggerPath, $propsTemplate)) {
     if (-not (Test-Path $required)) { throw "Required file not found: $required" }
 }
 
-# --- Fill in TenantId / ClientId from custodia-app.local.json if not passed --------------
-if ((-not $TenantId -or -not $ClientId) -and (Test-Path $localConfigPath)) {
+# --- Fill in TenantId / ClientId / ConnectorId from custodia-app.local.json if not passed --
+if ((-not $TenantId -or -not $ClientId -or -not $ConnectorId) -and (Test-Path $localConfigPath)) {
     $local = Get-Content $localConfigPath -Raw | ConvertFrom-Json
-    if (-not $TenantId) { $TenantId = $local.tenantId }
-    if (-not $ClientId) { $ClientId = $local.clientId }
+    if (-not $TenantId)    { $TenantId    = $local.tenantId }
+    if (-not $ClientId)    { $ClientId    = $local.clientId }
+    if (-not $ConnectorId) { $ConnectorId = $local.connectorId }
 }
 
 if (-not $TenantId -or -not $ClientId) {
@@ -134,27 +148,35 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'paconn login failed.' }
 
     Write-Host ''
-    Write-Host "Creating connector '$ConnectorName' in environment $EnvironmentId ..." -ForegroundColor Cyan
+    $isUpdate = [bool]$ConnectorId
+    if ($isUpdate) {
+        Write-Host "Updating existing connector $ConnectorId in environment $EnvironmentId ..." -ForegroundColor Cyan
+    } else {
+        Write-Host "Creating connector '$ConnectorName' in environment $EnvironmentId ..." -ForegroundColor Cyan
+    }
 
-    $createArgs = @(
-        'create',
+    $paconnArgs = @(
+        $(if ($isUpdate) { 'update' } else { 'create' }),
         '--env', $EnvironmentId,
         '--api-def', $swaggerPath,
         '--api-prop', $tempPropsPath,
         '--secret', $plainSecret
     )
-    if (Test-Path $iconPath) { $createArgs += @('--icon', $iconPath) }
+    if ($isUpdate) { $paconnArgs += @('--cid', $ConnectorId) }
+    if (Test-Path $iconPath) { $paconnArgs += @('--icon', $iconPath) }
 
-    $output = & paconn @createArgs 2>&1
+    $output = & paconn @paconnArgs 2>&1
     $output | ForEach-Object { Write-Host $_ }
 
     if ($LASTEXITCODE -ne 0) {
-        throw "paconn create failed. Full output above. You can still create the connector by hand — see README.md 'Custom connector' section."
+        $verb = if ($isUpdate) { 'update' } else { 'create' }
+        throw "paconn $verb failed. Full output above. You can still $verb the connector by hand — see README.md 'Custom connector' section."
     }
 
-    # paconn prints the new connector ID; capture it for the local record.
+    # paconn prints the connector ID; capture it for the local record (same ID on update).
     $connectorId = ($output | Select-String -Pattern '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' |
         Select-Object -First 1).Matches.Value
+    if (-not $connectorId -and $isUpdate) { $connectorId = $ConnectorId }
 }
 finally {
     # Never leave the plaintext secret or the filled-in tenant/client IDs sitting on disk.
@@ -164,14 +186,19 @@ finally {
 
 Write-Host ''
 Write-Host '=========================================================' -ForegroundColor Green
-Write-Host ' Custom connector created' -ForegroundColor Green
+Write-Host " Custom connector $(if ($isUpdate) { 'updated' } else { 'created' })" -ForegroundColor Green
 Write-Host '=========================================================' -ForegroundColor Green
 Write-Host "Environment ID: $EnvironmentId"
 if ($connectorId) { Write-Host "Connector ID:   $connectorId" }
 Write-Host ''
-Write-Host 'Next: create the Custodia agent in Copilot Studio, add this connector as an' -ForegroundColor Cyan
-Write-Host 'action, and make sure each user authenticates with their OWN credentials (do not' -ForegroundColor Cyan
-Write-Host 'use maker-provided credentials) — see README.md "3. Copilot Studio agent".' -ForegroundColor Cyan
+if ($isUpdate) {
+    Write-Host 'Existing agents using this connector pick up the change automatically —' -ForegroundColor Cyan
+    Write-Host 'nothing to redo in Copilot Studio.' -ForegroundColor Cyan
+} else {
+    Write-Host 'Next: create the Custodia agent in Copilot Studio, add this connector as an' -ForegroundColor Cyan
+    Write-Host 'action, and make sure each user authenticates with their OWN credentials (do not' -ForegroundColor Cyan
+    Write-Host 'use maker-provided credentials) — see README.md "3. Copilot Studio agent".' -ForegroundColor Cyan
+}
 
 if (Test-Path $localConfigPath) {
     $local = Get-Content $localConfigPath -Raw | ConvertFrom-Json

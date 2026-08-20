@@ -3,7 +3,7 @@
   "info": {
     "title": "Custodia eDiscovery",
     "description": "Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only; every call is bounded by the signed-in reviewer's own Purview eDiscovery role. Covers case, custodian, search, review set, tagging and export operations. Deliberately omits case deletion, purgeData, and legal hold creation or removal - those remain manual actions in the Purview portal.",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "contact": {
       "name": "Custodia"
     }
@@ -85,7 +85,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "post": {
         "operationId": "CreateCase",
@@ -114,7 +115,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}": {
@@ -146,7 +148,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "patch": {
         "operationId": "UpdateCase",
@@ -184,7 +187,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches": {
@@ -224,7 +228,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       },
       "get": {
         "operationId": "ListSearches",
@@ -263,7 +268,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}/estimateStatistics": {
@@ -315,7 +321,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/operations": {
@@ -364,7 +371,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}/lastEstimateStatisticsOperation": {
@@ -405,7 +413,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/close": {
@@ -434,7 +443,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/custodians": {
@@ -475,7 +485,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "post": {
         "operationId": "CreateCustodian",
@@ -513,7 +524,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/custodians/{ediscoveryCustodianId}": {
@@ -554,7 +566,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/noncustodialDataSources": {
@@ -595,7 +608,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/searches/{ediscoverySearchId}": {
@@ -636,7 +650,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "patch": {
         "operationId": "UpdateSearch",
@@ -683,7 +698,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets": {
@@ -724,7 +740,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "post": {
         "operationId": "CreateReviewSet",
@@ -762,7 +779,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}": {
@@ -803,7 +821,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}/addToReviewSet": {
@@ -855,7 +874,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/reviewSets/{ediscoveryReviewSetId}/export": {
@@ -907,7 +927,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/tags": {
@@ -948,7 +969,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       },
       "post": {
         "operationId": "CreateTag",
@@ -986,7 +1008,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": true
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/operations/{caseOperationId}": {
@@ -1027,7 +1050,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     },
     "/security/cases/ediscoveryCases/{ediscoveryCaseId}/legalHolds": {
@@ -1068,7 +1092,8 @@
               "$ref": "#/definitions/GraphError"
             }
           }
-        }
+        },
+        "x-openai-isConsequential": false
       }
     }
   },
