@@ -64,3 +64,26 @@ file, double-check the **Scope** field is **space-separated**, not
 comma-separated — `eDiscovery.ReadWrite.All User.Read offline_access` — since
 a malformed scope string can silently prevent the refresh token from being
 issued at all.
+
+Verified directly against the live agent: in a fresh conversation, a tool used
+for the first time prompts once; the same tool used again later in that
+session — including after the earlier access token would otherwise have
+expired — runs silently once `offline_access` is present.
+
+## Allow vs. Deny on the "Permission Required" card
+
+- **Allow** grants the connector a token scoped to **that one tool**, for
+  **that reviewer**, for **that session** — it is not a standing grant to
+  every tool, and it is not shared with any other reviewer. Approving
+  `ListCases` does not pre-approve `CreateSearch`.
+- **Deny** stops that specific call. Custodia reports that it could not
+  complete the action — per the "Never fabricate" rule in
+  `agent/instructions.md`, it will not retry silently, substitute a different
+  identity, or claim the action succeeded. Denying one tool does not block
+  the others; a reviewer who denies `CreateSearch` can still use `ListCases`
+  normally in the same conversation.
+- Neither Allow nor Deny changes what the reviewer can see. The token, once
+  granted, is still bounded by that reviewer's own Purview eDiscovery role —
+  Allow cannot grant access to a case the reviewer's role doesn't already
+  permit.
+

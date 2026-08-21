@@ -349,7 +349,19 @@ graph LR
           <p>Each distinct tool (list cases, create a search, etc.) asks for a one-time
           permission the first time a reviewer uses it in a session. That's the on-behalf-of
           consent model working as intended — the agent is asking to borrow the reviewer's own
-          Graph token, not a blanket grant. It won't ask again for that tool once granted.</p>
+          Graph token, not a blanket grant. It won't ask again for that tool once granted.
+          Verified directly: in a fresh session, a never-used tool prompts once, and a
+          previously-used tool runs silently — including after the token would otherwise have
+          expired, once the connector's scope includes <code>offline_access</code>.</p>
+        </div>
+        <div class="note">
+          <h4>Allow vs. Deny</h4>
+          <p><b>Allow</b> grants the connector a token scoped to that one tool, for that
+          reviewer, for that session — not a standing grant to every tool or every case.
+          <b>Deny</b> stops that specific call; Custodia reports that it couldn't complete the
+          action rather than retrying silently or substituting another identity. Denying one
+          tool doesn't block the others — a reviewer who denies <code>CreateSearch</code> can
+          still use <code>ListCases</code> normally.</p>
         </div>
         <div class="note">
           <h4>Not the same as the write confirmations</h4>
@@ -357,6 +369,15 @@ graph LR
           those come from <code>agent/instructions.md</code> and repeat every time by design.
           The one-time "Allow" card is Microsoft Entra ID granting the connector a token; it has
           nothing to do with whether the action is safe to repeat.</p>
+        </div>
+        <div class="note">
+          <h4>If it keeps re-prompting for the same tool</h4>
+          <p>That's not expected — check the connector's Security tab. The most common cause is
+          a missing <code>offline_access</code> scope (no refresh token is issued, so the
+          short-lived access token expires between calls) or a comma-separated <b>Scope</b>
+          field instead of space-separated. Both are documented in
+          <code>connector/apiProperties.json</code> and
+          <a href="https://github.com/Contoso-State/Custodia/blob/main/agent/greeting-and-prompts.md">agent/greeting-and-prompts.md</a>.</p>
         </div>
       </div>
     </div>
