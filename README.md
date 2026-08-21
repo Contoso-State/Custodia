@@ -269,7 +269,7 @@ as described below — nothing left to set by hand.
 | Tenant ID | `<TENANT-ID>` |
 | Resource URL | `https://graph.microsoft.com` |
 | Enable on-behalf-of login | **true** |
-| Scope | `eDiscovery.ReadWrite.All User.Read` |
+| Scope | `eDiscovery.ReadWrite.All User.Read offline_access` |
 
 Save the connector. Its generated Redirect URL is the same
 `https://global.consent.azure-apim.net/redirect` step 1 already registered — no need to copy

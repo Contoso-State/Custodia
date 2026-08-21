@@ -343,7 +343,9 @@ Write-Host '       Client secret:        (the value above)'
 Write-Host "       Tenant ID:            $TenantId"
 Write-Host '       Resource URL:         https://graph.microsoft.com'
 Write-Host '       Enable on-behalf-of login: true'
-Write-Host '       Scope:                eDiscovery.ReadWrite.All User.Read'
+Write-Host '       Scope:                eDiscovery.ReadWrite.All User.Read offline_access'
+Write-Host '       (offline_access gets you a refresh token, so a granted tool stays granted'
+Write-Host '       instead of re-prompting once its access token expires.)'
 Write-Host '     The redirect URI is already registered on this app - nothing to copy back.'
 Write-Host ''
 Write-Host 'Confirm in the portal that NO application (app-only) Graph permissions are present.' -ForegroundColor Yellow
