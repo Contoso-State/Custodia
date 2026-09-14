@@ -128,6 +128,14 @@ requires an explicit, separately-confirmed authorization naming the case, review
 recipient before it runs. If your process requires an approver distinct from the requester,
 that is not enforceable in a prompt — see [Phase 2](#phase-2--azure-function-backend-not-built).
 
+**How the download actually works.** Custodia never receives, stores, or forwards the exported
+file. Once the export operation succeeds, Microsoft Graph attaches an `exportFileMetadata`
+object (`downloadUrl`, `fileName`, `size`) to that operation, and `GetCaseOperation` returns it
+directly to the connector — this repo's `CaseOperation` schema declares that field explicitly so
+it isn't silently dropped. Custodia's job ends at surfacing that link in the reply; the reviewer
+clicks it and downloads the package straight from Purview, authenticated as themselves. The
+link is time-limited — treat it as belonging to that one export, not a permanent URL.
+
 Guardrails in the agent instructions are the second layer. The connector surface is the first,
 and it is the one that actually holds.
 

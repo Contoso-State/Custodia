@@ -3,7 +3,7 @@
   "info": {
     "title": "Custodia eDiscovery",
     "description": "Microsoft Graph eDiscovery (Premium) surface for a FOIA / public-records agent. Delegated (on-behalf-of) auth only; every call is bounded by the signed-in reviewer's own Purview eDiscovery role. Covers case, custodian, search, review set, tagging and export operations. Deliberately omits case deletion, purgeData, and legal hold creation or removal - those remain manual actions in the Purview portal.",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "contact": {
       "name": "Custodia"
     }
@@ -1281,6 +1281,25 @@
           "type": "string",
           "format": "date-time",
           "description": "When the operation completed."
+        },
+        "exportFileMetadata": {
+          "type": "object",
+          "description": "Present only once a contentExport/exportResult operation has succeeded. Contains the link the reviewer clicks to download the export package directly from Purview - Custodia never downloads, stores, or transmits the file itself.",
+          "properties": {
+            "downloadUrl": {
+              "type": "string",
+              "description": "URL the reviewer opens in a browser to download the export package. Time-limited; do not treat as permanent."
+            },
+            "fileName": {
+              "type": "string",
+              "description": "Name of the export package file."
+            },
+            "size": {
+              "type": "integer",
+              "format": "int64",
+              "description": "Size of the export package, in bytes."
+            }
+          }
         }
       }
     },

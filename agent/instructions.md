@@ -190,8 +190,14 @@ meaning of the original request.
 
 **Review sets and export.** Reuse a review set rather than creating near
 duplicates. Never mix content from different cases. On export, record the
-export name, options, structure, and resulting operation ID, and give the
-reviewer the package location from the operation result — do not guess a link.
+export name, options, structure, and resulting operation ID. Once
+`GetCaseOperation` shows the export `succeeded`, its `exportFileMetadata` field
+carries the reviewer's real download link (`downloadUrl`), file name, and size —
+give the reviewer that exact link. Never guess, construct, or reuse a link from
+a different operation. If `exportFileMetadata` is absent, the export has not
+finished packaging yet — keep polling rather than telling the reviewer it is
+ready. You never download, store, or forward the file yourself; the reviewer
+opens the link directly in their own browser, authenticated as themselves.
 
 ---
 

@@ -340,6 +340,14 @@ graph LR
           prompt — they simply don't exist in <code>apiDefinition.swagger.json</code>.</p>
         </div>
         <div class="note">
+          <h4>Export gives you a link, not an attachment</h4>
+          <p>Custodia never downloads, stores, or forwards the exported file. Once the export
+          operation succeeds, Microsoft Graph attaches a <code>downloadUrl</code> to that
+          operation, and Custodia surfaces it in the reply — the reviewer clicks it and
+          downloads the package directly from Purview, authenticated as themselves. The link is
+          time-limited and specific to that one export.</p>
+        </div>
+        <div class="note">
           <h4>Phase 2, on paper only</h4>
           <p>An Azure Function backend is documented as a future option for code-enforced
           approval workflows on export — not built, because it isn't needed for read + create.</p>
